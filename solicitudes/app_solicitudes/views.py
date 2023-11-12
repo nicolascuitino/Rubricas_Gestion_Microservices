@@ -22,7 +22,7 @@ def getSolicitud_id(request, idUsuario=None):
 #obtiene solicitudes que calcen con un mismo id_estudiante
 def getSolicitud_Estudiante(request, idUsuario=None):
     infoSolicitudes = Solicitud_Revision.objects.filter(id_estudiante = idUsuario)
-    serializer = Solicitud_Revision(infoSolicitudes, many=True)
+    serializer = OnlySolicitudSerializer(infoSolicitudes, many=True)
     print(infoSolicitudes)
     return Response(serializer.data)
 
@@ -37,8 +37,8 @@ def getSolicitud_Calificacion(request, id=None):
 @api_view(['GET'])
 #obtiene solicitudes que calcen con un mismo id_calificacion
 def getSolicitud_Estudiante_Evaluacion(request, idEstudiante=None, idEvaluacion =None):
-    infoSolicitudes = Solicitud_Revision.objects.filter(id_estudiante__id = idEstudiante, id_evaluacion__id = idEvaluacion)
-    serializer = Solicitud_Revision(infoSolicitudes, many=True)
+    infoSolicitudes = Solicitud_Revision.objects.filter(id_estudiante = idEstudiante, id_evaluacion = idEvaluacion)
+    serializer = OnlySolicitudSerializer(infoSolicitudes, many= "true")
     print(infoSolicitudes)
     return Response(serializer.data)
 
@@ -47,7 +47,7 @@ def getSolicitud_Estudiante_Evaluacion(request, idEstudiante=None, idEvaluacion 
 def postSolicitud(request):
  
     if request.method == 'POST':
-        nuevaSolicitud = Solicitud_Revision(data = request.data)
+        nuevaSolicitud = OnlySolicitudSerializer(data = request.data)
         if nuevaSolicitud.is_valid():
             nuevaSolicitud.save()
             return Response(nuevaSolicitud.data)

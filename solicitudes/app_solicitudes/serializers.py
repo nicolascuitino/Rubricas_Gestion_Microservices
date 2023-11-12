@@ -7,3 +7,4 @@ class OnlySolicitudSerializer(serializers.ModelSerializer):
         model = Solicitud_Revision
         fields = '__all__'
 
+

@@ -5,3 +5,22 @@ from app_coordinadores.models import *
 
 
 admin.site.register(Coordinador)
+
+admin.site.register(Facultad)
+admin.site.register(Departamento)
+admin.site.register(Carrera)
+admin.site.register(Plan_Estudio)
+admin.site.register(Tipo_Asignatura)
+admin.site.register(Asignatura)
+admin.site.register(Asignaturas_PlanEstudio)
+admin.site.register(Semestre)
+admin.site.register(Coordinacion_Seccion)
+admin.site.register(Estadistica_Curso)
+admin.site.register(Coordinacion_Docente)
+admin.site.register(Coordinacion_Estudiante)
+admin.site.register(Tipo_Evaluacion)
+admin.site.register(Evaluacion)
+admin.site.register(Cambio_Ponderacion)
+admin.site.register(Cambio_Fecha)
+admin.site.register(Calificacion)
+admin.site.register(Cambio_nota)
