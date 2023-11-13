@@ -24,16 +24,16 @@ class CoordinadorSerializer(serializers.ModelSerializer):
 class OnlySolicitudSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     anterior_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1)
-    actual_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True)
-    fecha_creacion = models.DateField(null = False)
-    archivoAdjunto = models.FileField(blank = True, null = True)
-    respuesta = models.TextField(blank = True, null = True, default = '')
-    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
-    estado = models.CharField(max_length = 1, blank = False, default = '')
-    id_estudiante = models.PositiveIntegerField(null = False)
-    id_docente = models.PositiveIntegerField( null = False)
-    id_evaluacion = models.PositiveIntegerField( null = False)
-    id_calificacion = models.PositiveIntegerField(null = True)
+    actual_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1, allow_null = True)
+    fecha_creacion = serializers.DateField(allow_null = False)
+    archivoAdjunto = serializers.FileField(allow_null = True)
+    respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
+    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
+    id_estudiante = serializers.IntegerField(allow_null = False)
+    id_docente = serializers.IntegerField( allow_null = False)
+    id_evaluacion = serializers.IntegerField( allow_null = False)
+    id_calificacion = serializers.IntegerField(allow_null = True)
    
     class Meta:
         fields = '__all__'
@@ -120,8 +120,8 @@ class EstudianteSerializer(serializers.Serializer):
 
 # Modelo: Calificación -------------------------------------------------------
 class CalificacionSerializer(serializers.ModelSerializer):
-    id_evaluacion = EvaluacionSerializer()
-    id_estudiante = EstudianteSerializer()
+    #id_evaluacion = EvaluacionSerializer()
+    #id_estudiante = EstudianteSerializer()
     class Meta:
         model = Calificacion      
         fields = ('id', 'nota', 'fecha_entrega', 'obs_privada', 'adjunto' ,'id_evaluacion', 'id_estudiante')  
@@ -133,27 +133,27 @@ class CalificacionEspecificaSerializer(serializers.ModelSerializer):
 # -----------------------------------------------------------------------------
 
 class SolicitudSerializer(serializers.Serializer):
-    id_evaluacion = EvaluacionSerializer()
-    id_estudiante = EstudianteSerializer()
-    id_docente = DocenteSerializer()
-    id_calificacion = CalificacionEspecificaSerializer()
+    #id_evaluacion = EvaluacionSerializer()
+    #id_estudiante = EstudianteSerializer()
+    #id_docente = DocenteSerializer()
+    #id_calificacion = CalificacionEspecificaSerializer()
 
     #Solicitud
     id = serializers.IntegerField()
     anterior_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1)
-    actual_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True)
-    fecha_creacion = models.DateField(null = False)
-    archivoAdjunto = models.FileField(blank = True, null = True)
-    respuesta = models.TextField(blank = True, null = True, default = '')
-    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
-    estado = models.CharField(max_length = 1, blank = False, default = '')
+    actual_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1, allow_null = True)
+    fecha_creacion = serializers.DateField(allow_null = False)
+    archivoAdjunto = serializers.FileField(allow_null = True)
+    respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
+    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
     class Meta:
        
         fields = '__all__'
 
 # Modificado: Se quito el comentario de id_estudiante.
 class CoordinacionEstudianteSerializer(serializers.ModelSerializer):
-    id_estudiante = EstudianteSerializer()
+    #id_estudiante = EstudianteSerializer()
     id_coordinacion = CoordinacionSeccionSerializer()
     class Meta:
         model = Coordinacion_Estudiante    
@@ -161,19 +161,20 @@ class CoordinacionEstudianteSerializer(serializers.ModelSerializer):
 
 #Serializer para mostrar datos en respuesta de solicitud
 class SolicitudRespuestaSerializer(serializers.Serializer):
-    id_estudiante = EstudianteSerializer()
-    id_evaluacion = EvaluacionSerializer()
-    id_calificacion = CalificacionEspecificaSerializer()
+    #id_estudiante = EstudianteSerializer()
+    #id_evaluacion = EvaluacionSerializer()
+    #id_calificacion = CalificacionEspecificaSerializer()
     #Solicitud
+
     id = serializers.IntegerField()
     anterior_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1)
-    actual_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True)
-    fecha_creacion = models.DateField(null = False)
-    archivoAdjunto = models.FileField(blank = True, null = True)
-    respuesta = models.TextField(blank = True, null = True, default = '')
-    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
-    estado = models.CharField(max_length = 1, blank = False, default = '')
-    id_docente = models.PositiveIntegerField( null = False)
+    actual_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1, allow_null = True)
+    fecha_creacion = serializers.DateField(allow_null = False)
+    archivoAdjunto = serializers.FileField(allow_null = True)
+    respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
+    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
+    id_docente = serializers.IntegerField( allow_null = False)
     class Meta:
         
         fields = '__all__'
@@ -188,7 +189,7 @@ class CoordinacionCoordinadorSerializer(serializers.ModelSerializer):
 ## Saber las secciones de un coordinador con su asignatura - 1
 class DocenteCursoSerializer(serializers.ModelSerializer):
     id_coordinacion = CoordinacionCoordinadorSerializer()
-    id_docente = DocenteSerializer()
+    #id_docente = DocenteSerializer()
     class Meta:
         model = Coordinacion_Docente      
         fields = '__all__'  

@@ -89,19 +89,21 @@ def getCalificacionesEstudiante(request, idUsuario = None):
     #calificacion.id_estudiante -> id_usuario = idUsuario,
     infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json() 
     calificaciones = Calificacion.objects.filter(id_estudiante = infoEstudiante["id"], id_evaluacion__id_coordinacion__id_semetre__isActual = True).all().order_by('-fecha_entrega')
-    serializer = CalificacionSerializer(calificaciones, many = "true")
+    serializer = CalificacionSerializer(calificaciones, many = "true", context={'estudiante': infoEstudiante})
     return Response(serializer.data)
 
+#Funcionando
 #--Necesita modificaciones microservicios
 @api_view(['GET'])
 def getDataAsignatura(request, codigo = None, idUsuario = None):
 
     ## Buscar la coordinacion del curso de teoria con el codigo y id del usuario - verificar que existe seccion del estudiante
-    ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "T", id_estudiante__id_usuario = idUsuario).values_list('id_coordinacion__id',flat=True)
+    infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json() 
+    ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "T", id_estudiante = infoEstudiante["id"]).values_list('id_coordinacion__id',flat=True)
     if ids_coordinacion.count() != 0:
 
         ## Evaluaciones con calificaciones
-        calificaciones = Calificacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__codigo = codigo, id_evaluacion__id_coordinacion__id_asignatura__componente = "T", id_estudiante__id_usuario__id = idUsuario).all()
+        calificaciones = Calificacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__codigo = codigo, id_evaluacion__id_coordinacion__id_asignatura__componente = "T", id_estudiante = infoEstudiante["id"]).all()
         serializer = CalificacionSerializer(calificaciones, many="true")
 
         ## Calificaciones con solicitudes segun asignaturas de Teoria del estudiante
@@ -132,16 +134,17 @@ def getDataAsignatura(request, codigo = None, idUsuario = None):
     else: ## No existe seccion por lo que no tiene curso de teoria
         return Response([[],[],[],[]])
 
-    
+#Funcionando
 #--Necesita modificaciones microservicios
 @api_view(['GET'])
 def getDataAsignaturaLab(request, codigo = None, idUsuario = None):
     ## Buscar la coordinacion del curso de teoria con el codigo y id del usuario - verificar que existe seccion del estudiante
-    ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "L", id_estudiante__id_usuario = idUsuario).values_list('id_coordinacion__id',flat=True)
+    infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "L", id_estudiante = infoEstudiante["id"]).values_list('id_coordinacion__id',flat=True)
     if ids_coordinacion.count() != 0:
 
         ## Evaluaciones con calificaciones
-        calificaciones = Calificacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__codigo = codigo, id_evaluacion__id_coordinacion__id_asignatura__componente = "L", id_estudiante__id_usuario__id = idUsuario).all()
+        calificaciones = Calificacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__codigo = codigo, id_evaluacion__id_coordinacion__id_asignatura__componente = "L", id_estudiante = infoEstudiante["id"]).all()
         serializer = CalificacionSerializer(calificaciones, many="true")
 
         ## Calificaciones con solicitudes segun asignaturas de Teoria del estudiante
