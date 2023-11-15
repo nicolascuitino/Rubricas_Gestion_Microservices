@@ -242,7 +242,7 @@ def getDataSolicitudRespuesta(request,idEstudiante = None, idEvaluacion = None):
     serializer = SolicitudRespuestaSerializer(solicitudes, many = "true")
     return Response(serializer.data)
 
-#--No probado
+#--Funcionando
 ## ACtualizacion de calificaciones de una solicitud
 @api_view(['GET','PUT'])
 def actualizacionCalificacionEstudiante(request, idCalificacion = None):
@@ -261,16 +261,16 @@ def actualizacionCalificacionEstudiante(request, idCalificacion = None):
             return Response(calificacion_actualizada.data)
         return Response(calificacion_actualizada.errors)
     
-#--No probado
+#--Funcionando
 # Obtiene los estudiantes que estan inscitos en una coordinacion. 
 # Se cargan en la vista de subir calificaciones.
 @api_view(['GET'])
-def getCalifiacionesEstudiantes(request, idCoordinacion = None):
+def getCalificacionesEstudiantes(request, idCoordinacion = None):
     calificacionEstudiantes = Coordinacion_Estudiante.objects.filter(id_coordinacion__id = idCoordinacion).all()
     serializer = CoordinacionEstudianteSerializer(calificacionEstudiantes, many="true")
     return Response(serializer.data)
     
-#--No probado
+#--Funcionando
 @api_view(['GET', 'DELETE', 'POST', 'PUT']) ## Mostrar evaluaciones a jefe de carrera
 def evaluacionesCoordinacion(request, idEvaluacion = None, idCoordinacion = None):
 
@@ -303,14 +303,14 @@ def evaluacionesCoordinacion(request, idEvaluacion = None, idCoordinacion = None
             return Response(evaluacion_actualizada.data)
         return Response(evaluacion_actualizada.errors)
     
-#--No probado
+#--Funcionando
 @api_view(['GET'])
 def getTiposEvaluaciones(request):
     tiposEvaluaciones = Tipo_Evaluacion.objects.all()
     serializer = TipoEvaluacionSerializer(tiposEvaluaciones, many="true")
     return Response(serializer.data)
 
-#--No probado
+#--Funcionando
 # Arreglar esta vista para que entregue las coordinaciones con los profesores agrupados (2 o más profesores). ## Solucionado
 # Saber que coordinacion quiere visualizar, de aqui sacar el id para ver la tabla Solicitud -> CursoInscrito
 @api_view(['GET'])
@@ -325,13 +325,14 @@ def getCoordinacionesCoordinador(request, idCoordinador = None):
     #serializer = DocenteCursoSerializer(coordinacionesCoordinador, many="true")
     return Response(arregloInformacion)
 
-#--No probado
+#-- Funcionando
 @api_view(['GET'])
 def getCoordinacionesAsignatura(request, idAsignatura = None):
     coordinacionesAsignatura = Coordinacion_Docente.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura).distinct('id_coordinacion')
     serializer = DocenteCursoSerializer(coordinacionesAsignatura, many = "true")
     return Response(serializer.data)
 
+#-- No funcionando
 #-- No probado
 #-- Necesita modificaciones microservicios
 ## LUego de especificar la seccion se recogen las solicitudes de este curso-seccion id para ver la tabla Solicitud -> CursoInscrito
@@ -339,23 +340,28 @@ def getCoordinacionesAsignatura(request, idAsignatura = None):
 def getSolicitudesCurso(request, idCoordinacion = None):
     
     ### ID de cursoInscrito o Coordinacion Seccion
+    #solicitudes con id_evaluacion que calce con una evaluacion con id_coordinacion = idCoordinacion
+    #evaluaciones = Evaluacion.objects.filter(id_coordinacion = idCoordinacion)
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+
     solicitudesCurso = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion = idCoordinacion).all()
     
     serializer = SolicitudesDocenteCursoSerializer(solicitudesCurso, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Asignaturas de un jefe de carrera
 @api_view(['GET'])
 def getAsignaturasJefeCarrera(request, idJefe = None):
     ### ID jefe de carrera, se mostraran sus asignaturas
+
     planesEstudio = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = idJefe).distinct('id_asignatura').all()
     
     serializer = PlanesJefeSerializer(planesEstudio, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- No Funcionando
 #-- Necesita modificaciones microservicios
 ## Solicitudes de una asignatura (Jefe de carrera)
 @api_view(['GET'])
@@ -369,28 +375,30 @@ def getSolicitudesAsignaturaJefeCarrera(request, idAsignatura = None):
     secciones = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_evaluacion__id_coordinacion__seccion',flat= True).distinct()
     return Response([serializer.data,coordinaciones,secciones])
     
-#-- No probado    
+#-- Funcionando
 @api_view(['GET'])
 def getAllEvaluaciones(request, idCoordinacion = None):
     evaluacionCoordinacion = Evaluacion.objects.filter(id_coordinacion__id = idCoordinacion).all().order_by('nombre')
     serializer = EvaluacionEspecificaSerializer(evaluacionCoordinacion, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def getEvaluacionesPorNombre(request, nombreEvaluacion = None, idAsignatura = None):
     evaluaciones = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura, nombre = nombreEvaluacion).all()
     serializer = EvaluacionEspecificaSerializer(evaluaciones, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- No da errores, pero no devuelve nada ya que no se almacenan los usuarios
+#   en este microservicio, corresponde a autenticacion
 @api_view(['GET'])
 def getRolesUsuarios(request):
     roles = Group.objects.all()
     serializer = RolesSerializers(roles, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- No da errores, pero no devuelve nada ya que no se almacenan los usuarios
+#   en este microservicio, corresponde a autenticacion
 @api_view(['POST'])
 def isRolUser(request):
 
@@ -400,7 +408,7 @@ def isRolUser(request):
         return Response(serializer.data)
     return Response(error)
 
-#-- No probado
+#-- Funcionando
 @api_view(['POST'])
 def calificacionesEstudiantes(request):
     calificacion = CalificacionEspecificaSerializer(data = request.data)
@@ -409,7 +417,7 @@ def calificacionesEstudiantes(request):
         return Response(calificacion.data)
     return Response(calificacion.errors)
 
-#-- No probado
+#-- Funcionando
 # Obtener los datos de una evaluación en particular. Cambiar el estado de una evaluacion.
 @api_view(['GET', 'PUT'])
 def crudOneEvaluacion(request, idEvaluacion = None):
@@ -419,7 +427,7 @@ def crudOneEvaluacion(request, idEvaluacion = None):
         serializer = PostEvaluacionSerializer(test)
         return Response(serializer.data)
     
-#-- No probado
+#-- No Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getSolicitudesByIdDocente(request, idDocente):
@@ -427,7 +435,7 @@ def getSolicitudesByIdDocente(request, idDocente):
     serializer = SolicitudSerializer(solicitudes, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- No funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getCalificaionesByDocente(request,  idEvaluacion):
@@ -435,7 +443,7 @@ def getCalificaionesByDocente(request,  idEvaluacion):
     serializer = CalificacionSerializer(calificaciones, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 @api_view(['PUT'])
 def updateCalificacion(request, idCalificacion):
     calificacion = Calificacion.objects.get(id = idCalificacion)
@@ -445,7 +453,7 @@ def updateCalificacion(request, idCalificacion):
         return Response(calificacion_actualizada.data)
     return Response(calificacion_actualizada.errors)
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET','POST'])
 def addCambioNota(request, idAsignatura = None):
     
@@ -467,7 +475,7 @@ def addCambioNota(request, idAsignatura = None):
             return Response(CambioAgregado.data)
         return Response(CambioAgregado.errors)
 
-#-- No probado
+#-- Funcionando
 # obtener los cambios segun una asignatura
 @api_view(['GET'])
 def getCambioNota_idAsignatura(request,idAsignatura = None):
@@ -482,7 +490,7 @@ def getCambioNota_idAsignatura(request,idAsignatura = None):
         secciones = Cambio_nota.objects.filter(id_calificacion__id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_calificacion__id_evaluacion__id_coordinacion__seccion',flat= True).distinct()
         return Response([serializer.data,coordinaciones, secciones])
 
-#-- No probado
+#-- Funcionando
 @api_view(['POST'])
 def cambioFechaCalificacion(request):
     cambioFecha = CambioFechaSerializer(data = request.data)
@@ -491,7 +499,7 @@ def cambioFechaCalificacion(request):
         return Response(cambioFecha.data)
     return Response(cambioFecha.errors)
 
-#-- No probado
+#-- Funcionando
 @api_view(['POST'])
 def addCambioPonderacion(request):
     cambioPonderacion = CambioPonderacionSerializer(data = request.data)
@@ -500,21 +508,21 @@ def addCambioPonderacion(request):
         return Response(cambioPonderacion.data)
     return Response(cambioPonderacion.errors)
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def getCambiosNota(request, idCoordinador = None):
     cambiosNota = Cambio_nota.objects.filter(id_calificacion__id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idCoordinador)
     serializer = CambioNotaDashboardSerializer(cambiosNota, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def informacionCoordinacion(request, idCoordinacion = None):
     coordinacion = Coordinacion_Seccion.objects.filter(id = idCoordinacion).all()
     serializer = CoordinacionSeccionSerializer(coordinacion, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 # Get de los cambios de ponderaciones segun jefe de carrera
 @api_view(['GET'])
 def getCambioPonderaciones(request, idAsignatura = None):
@@ -526,7 +534,7 @@ def getCambioPonderaciones(request, idAsignatura = None):
     secciones = Cambio_Ponderacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_evaluacion__id_coordinacion__seccion',flat= True).distinct()
     return Response([serializer.data,coordinaciones,secciones])
 
-#-- No probado
+#-- Funcionando
 # Get cambios de fecha segun jefe de carrera
 @api_view(['GET'])
 def getCambioFecha(request, idAsignatura = None):
@@ -538,7 +546,7 @@ def getCambioFecha(request, idAsignatura = None):
     secciones = Cambio_Fecha.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_evaluacion__id_coordinacion__seccion',flat= True).distinct()
     return Response([serializer.data,coordinaciones,secciones])
 
-#-- No probado
+#-- Funcionando
 ## LUego de especificar la seccion se recogen los cambios de notas de este curso-seccion id para VISTA COORDINADOR
 @api_view(['GET'])
 def getCambioNotaCurso(request, idCurso = None):
@@ -547,14 +555,14 @@ def getCambioNotaCurso(request, idCurso = None):
     serializer = CambioNotaDashboardSerializer(cambioNotasCurso, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def getEntregaPendienteEvaluacion(request, idDocente = None):
-    evPendientes = Evaluacion.objects.filter(id_docente__id = idDocente, estado = 'P').order_by('fechaEntrega').all()
+    evPendientes = Evaluacion.objects.filter(id_docente = idDocente, estado = 'P').order_by('fechaEntrega').all()
     serializer = EvaluacionSerializer(evPendientes, many = "true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 #Visualizar para autoridad asignaturas atrasadas y cantidad de atrasos
 @api_view(['GET'])
 def getAsignaturasAtrasadas(request):
@@ -585,7 +593,7 @@ def getAsignaturasAtrasadas(request):
 
     return Response([serializerAsignaturas.data,numeroAtrasosAsignaturas])
 
-#-- No probado
+#-- Funcionando
 #Visualizar Secciones de una asignatura con atrasos y su numero
 @api_view(['GET'])
 def getSeccionesAsignaturaAtrasadas(request, idAsignatura = None):
@@ -611,14 +619,14 @@ def getSeccionesAsignaturaAtrasadas(request, idAsignatura = None):
 
     return Response([serializerSeccionesAtrasadas.data, listaNumeroAtrasos])
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def getAllEvaluacionesMail(request):
     evaluaciones = Evaluacion.objects.all()
     serializer = EvaluacionDocenteSerializer(evaluaciones, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- No Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardCoordinador(request, idUsuario = None):
@@ -632,7 +640,7 @@ def getInfoDashboardCoordinador(request, idUsuario = None):
 
     return Response([numeroAsignaturas, evaluacionesPendientes, solicitudesActuales, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas,solicitudesRevision])
 
-#-- No probado
+#-- No Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardEstudiante(request, idUsuario = None):
@@ -649,7 +657,7 @@ def getInfoDashboardEstudiante(request, idUsuario = None):
 
     return Response([serializer.data, solicitudesRevision, solicitudesRealizadas, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas, serializerTwo.data])
 
-#-- No probado
+#-- No funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardJefeCarrera(request, idUsuario = None):
@@ -673,7 +681,7 @@ def getInfoDashboardJefeCarrera(request, idUsuario = None):
     return Response([estudiantesEnCarrera, solicitudesSemestre, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas, notasCambiadas])
 
 
-#-- No probado
+#-- No funcionando
 @api_view(['GET'])
 def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuario = None):
     # Funcionando.
@@ -699,7 +707,7 @@ def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuari
                     evaluaciones[index].extend(EvaluacionSerializer(evaluacionesPorNombre, many = "true").data)
         return Response(evaluaciones)
 
-#-- No probado
+#-- No funcionando
 @api_view(['GET']) ## Cambio a bloque horario - antes id, se agrega distinct
 def informacionCoordinacionCursoEspejo(request, idUsuario = None ,bloqueHorario = None):
     coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id_usuario__id = idUsuario).distinct('id_coordinacion__bloques_horario')
@@ -709,13 +717,13 @@ def informacionCoordinacionCursoEspejo(request, idUsuario = None ,bloqueHorario 
     return Response([serializerUnico.data,serializer.data])
 
 
-#-- No probado
+#-- Funcionando
 # Obtiene los estudiantes que estan inscitos en una coordinacion. 
 # Se cargan en la vista de subir calificaciones.
 @api_view(['GET'])
 def getCalificacionesEstudiantesCursosEspejo(request,bloqueHorario = None, idDocente = None):
     ## Curso en comun de los estudiantes, se asume que un estudiante no puede estar en los dos cursos inscrito
-    cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id = idDocente).values_list('id_coordinacion__id',flat=True)
+    cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = idDocente).values_list('id_coordinacion__id',flat=True)
     arregloEstudiante = []
     for id in cursosComun:
         calificacionEstudiantes = Coordinacion_Estudiante.objects.filter(id_coordinacion = id).distinct('id_estudiante')
@@ -724,7 +732,7 @@ def getCalificacionesEstudiantesCursosEspejo(request,bloqueHorario = None, idDoc
     return Response(arregloEstudiante)
 
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 """ Función para obtener la coordinación (Laboratorio o Teoría) inscrita por un estudiante. 
 Útil para visualizar las calificaciones y evaluaciones de un estudiante en el componente opuesto,
@@ -733,23 +741,23 @@ En el caso de que el estudiante esté inscrito en un único componente, la funci
 Mencionar además que se consideran los cursos espejos, ya que la función se utiliza en Docente. """ 
 @api_view(['GET'])
 def estudiantePertenece(request, bloqueHorario = None, idDocente = None, componente = None, idEstudiante = None):
-    asignaturasComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id = idDocente, id_coordinacion__isActive = True).values_list('id_coordinacion__id_asignatura__codigo', flat=True)
+    asignaturasComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = idDocente, id_coordinacion__isActive = True).values_list('id_coordinacion__id_asignatura__codigo', flat=True)
     for codigoAsignatura in asignaturasComun:
-        consult = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigoAsignatura, id_coordinacion__id_asignatura__componente = componente, id_estudiante__id = idEstudiante, id_coordinacion__isActive = True)
+        consult = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigoAsignatura, id_coordinacion__id_asignatura__componente = componente, id_estudiante = idEstudiante, id_coordinacion__isActive = True)
         if consult:
             serializer = CoordinacionEstudianteSerializer(consult, many = "true")
             return Response(serializer.data)
 
     return Response(False)
 
-#-- No probado
+#-- Funcionando
 # Obtener los datos de una evaluación en particular. Cambiar el estado de una evaluacion.
 @api_view(['GET', 'PUT'])
 def crudOneEvaluacionCursosEspejo(request, bloqueHorario = None, idDocente = None, nombreEvaluacion =None):
     
     if request.method == 'GET':
         ## Curso en comun de las evaluaciones, ademas se busca por el nombre en particular
-        cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id = idDocente).values_list('id_coordinacion__id',flat=True)
+        cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = idDocente).values_list('id_coordinacion__id',flat=True)
         evaluacionesDevolver = []
         #Evaluaciones a poner nota
         for id in cursosComun:
@@ -763,7 +771,7 @@ def crudOneEvaluacionCursosEspejo(request, bloqueHorario = None, idDocente = Non
 @api_view(['GET'])
 def getCalificacionesByDocenteCursosEspejo(request,bloqueHorario = None, idDocente = None, nombreEvaluacion =None):
     ## Curso en comun de las evaluaciones, ademas se busca por el nombre en particular  
-    cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id = idDocente).values_list('id_coordinacion__id',flat=True)
+    cursosComun = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = idDocente).values_list('id_coordinacion__id',flat=True)
     calificacionesDevolver = []
     #Calificaciones de estudiantes segun evaluacion y cursos espejo
     for id in cursosComun:

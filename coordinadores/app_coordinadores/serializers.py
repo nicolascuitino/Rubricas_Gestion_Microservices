@@ -57,13 +57,10 @@ class DocenteSerializer(serializers.Serializer):
     class Meta:
         fields = ('id', 'rut', 'dig_verificador', 'id_usuario')
 
-class CoordinadorSerializers(serializers.Serializer):
-    id = serializers.IntegerField()
-    rut = serializers.IntegerField()
-    dig_verificador = serializers.CharField()
-    id_usuario = UsuariosSerializers()
-    
+class CoordinadorSerializers(serializers.ModelSerializer):
+    #id_usuario = UsuariosSerializers()
     class Meta:
+        model = Coordinador
         fields = '__all__'
 
 
@@ -94,7 +91,7 @@ class CoordinacionDocenteSerializer(serializers.ModelSerializer):
 class EvaluacionSerializer(serializers.ModelSerializer):
     id_coordinacion = CoordinacionSeccionSerializer()
     id_tipoEvaluacion = TipoEvaluacionSerializer()
-    id_docente = DocenteSerializer()
+    #id_docente = DocenteSerializer()
     
     class Meta:
         model = Evaluacion
@@ -313,7 +310,7 @@ class CambioPonderacionesJefe(serializers.ModelSerializer):
         fields = '__all__'
 
 class EvaluacionDocenteSerializer(serializers.ModelSerializer):
-    id_docente = DocenteSerializer()
+    #id_docente = DocenteSerializer()
     id_coordinacion = CoordinacionSeccionSerializer()
     class Meta:
         model = Evaluacion

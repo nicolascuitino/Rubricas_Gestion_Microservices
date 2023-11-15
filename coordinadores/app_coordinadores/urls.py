@@ -30,7 +30,7 @@ urlpatterns = [
     path('cursosDocente/<int:idUsuario>', views.getCursosByDocente),
     path('solicitudRespuesta/<int:idEstudiante>/<int:idEvaluacion>', views.getDataSolicitudRespuesta),
     path('actualizar/calificacion/<int:idCalificacion>', views.actualizacionCalificacionEstudiante),
-    path('calificacion/coordinacion/<int:idCoordinacion>', views.getCalifiacionesEstudiantes),
+    path('calificacion/coordinacion/<int:idCoordinacion>', views.getCalificacionesEstudiantes),
     path('evaluaciones/<int:idCoordinacion>', views.evaluacionesCoordinacion),
     path('delete/evaluacion/<int:idEvaluacion>', views.evaluacionesCoordinacion),
     path('add/evaluacion', views.evaluacionesCoordinacion),

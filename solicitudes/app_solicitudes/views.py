@@ -42,6 +42,14 @@ def getSolicitud_Estudiante_Evaluacion(request, idEstudiante=None, idEvaluacion 
     print(infoSolicitudes)
     return Response(serializer.data)
 
+@api_view(['GET'])
+#obtiene solicitudes que calcen con un mismo id_calificacion
+def getSolicitud_All(request):
+    infoSolicitudes = Solicitud_Revision.objects.all()
+    serializer = OnlySolicitudSerializer(infoSolicitudes, many= "true")
+    print(infoSolicitudes)
+    return Response(serializer.data)
+
 
 @api_view(['POST'])
 def postSolicitud(request):
