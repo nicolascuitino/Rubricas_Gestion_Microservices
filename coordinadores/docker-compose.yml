@@ -1,0 +1,15 @@
+version: '3.11.5'
+
+services:
+  web:
+    build: ./app
+    command: python manage.py runserver
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - 8002:8002
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+ 

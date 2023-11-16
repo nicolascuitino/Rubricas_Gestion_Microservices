@@ -17,6 +17,13 @@ def getDocente(request, idUsuario=None):
     print(infoDocente)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def getDocente_id(request, idDocente=None):
+    infoDocente = Docente.objects.filter(id = idDocente).first()
+    serializer = DocenteSerializer(infoDocente)
+    print(infoDocente)
+    return Response(serializer.data)
+
 
 @api_view(['POST'])
 def postDocente(request):

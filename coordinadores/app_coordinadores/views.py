@@ -89,7 +89,8 @@ def getCalificacionesEstudiante(request, idUsuario = None):
     #calificacion.id_estudiante -> id_usuario = idUsuario,
     infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json() 
     calificaciones = Calificacion.objects.filter(id_estudiante = infoEstudiante["id"], id_evaluacion__id_coordinacion__id_semetre__isActual = True).all().order_by('-fecha_entrega')
-    serializer = CalificacionSerializer(calificaciones, many = "true", context={'estudiante': infoEstudiante})
+    print(calificaciones)
+    serializer = CalificacionSerializer(calificaciones, many = "true")
     return Response(serializer.data)
 
 #Funcionando
@@ -183,6 +184,7 @@ def getDataSolicitudApelacion(request, idCalificacion = None):
     return Response(serializer.data)
 
 #--Deberia funcionar pero da error por no poblar base de datos
+#Problama con many = true
 # Solicitudes de revisión realizadas por un estudiante.
 @api_view(['GET', 'PUT'])
 def dataSolicitud(request, idUsuario = None, idSolicitud = None):
@@ -191,8 +193,16 @@ def dataSolicitud(request, idUsuario = None, idSolicitud = None):
         estudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
         #estudiante = EstudianteSerializer(estudiante)
         solicitudes = requests.get("http://127.0.0.1:8003/solicitud_E/%s" % estudiante["id"]).json()
+        #for s in solicitudes:
+        #    Solicitud_Revision.objects.create(id=s["id"], motivo=s["motivo"],
+        #                                      anterior_nota=s["anterior_nota"], actual_nota=s["actual_nota"],
+        #                                      fecha_creacion=s["fecha_creacion"], archivoAdjunto=s["archivoAdjunto"],
+        #                                      respuesta=s["respuesta"], fecha_respuesta=s["fecha_respuesta"],
+        #                                      estado=s["estado"], id_estudiante=s["id_estudiante"],
+        #                                      id_docente=s["id_docente"], id_evaluacion=s["id_evaluacion"],
+        #                                      id_calificacion=s["id_calificacion"])
+        #print(Solicitud_Revision.objects.all())
         serializer = SolicitudSerializer(solicitudes, many = "true")
-        print(serializer.data)
         return Response(serializer.data)
     
     if request.method == 'PUT':
@@ -232,6 +242,7 @@ def getCursosByDocente(request, idUsuario = None):
     return Response(serializer.data)
 
 #--Funcionando
+#Problema con many = true
 ## Obtener informacion para realizar la respuesta a una apelacion
 ## ID estudiante - ID evaluacion - 
 @api_view(['GET'])
@@ -343,7 +354,7 @@ def getSolicitudesCurso(request, idCoordinacion = None):
     #solicitudes con id_evaluacion que calce con una evaluacion con id_coordinacion = idCoordinacion
     #evaluaciones = Evaluacion.objects.filter(id_coordinacion = idCoordinacion)
     #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
-
+    #Se obtienen solicitudes cuya evaluacion coincida con el id_coordinacion 
     solicitudesCurso = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion = idCoordinacion).all()
     
     serializer = SolicitudesDocenteCursoSerializer(solicitudesCurso, many="true")
@@ -435,11 +446,11 @@ def getSolicitudesByIdDocente(request, idDocente):
     serializer = SolicitudSerializer(solicitudes, many="true")
     return Response(serializer.data)
 
-#-- No funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getCalificaionesByDocente(request,  idEvaluacion):
-    calificaciones = Calificacion.objects.filter(id_evaluacion__id = idEvaluacion).all().order_by('id_estudiante__rut')
+    calificaciones = Calificacion.objects.filter(id_evaluacion__id = idEvaluacion).all().order_by('id_estudiante')
     serializer = CalificacionSerializer(calificaciones, many = "true")
     return Response(serializer.data)
 
@@ -718,6 +729,7 @@ def informacionCoordinacionCursoEspejo(request, idUsuario = None ,bloqueHorario 
 
 
 #-- Funcionando
+# Problemas con coordinacionestudianteserializer
 # Obtiene los estudiantes que estan inscitos en una coordinacion. 
 # Se cargan en la vista de subir calificaciones.
 @api_view(['GET'])
@@ -766,7 +778,7 @@ def crudOneEvaluacionCursosEspejo(request, bloqueHorario = None, idDocente = Non
         
         return Response(evaluacionesDevolver) 
 
-#-- No probado
+#-- Funcionando
 ## Calificiones segun una evaluacion
 @api_view(['GET'])
 def getCalificacionesByDocenteCursosEspejo(request,bloqueHorario = None, idDocente = None, nombreEvaluacion =None):
@@ -776,11 +788,11 @@ def getCalificacionesByDocenteCursosEspejo(request,bloqueHorario = None, idDocen
     #Calificaciones de estudiantes segun evaluacion y cursos espejo
     for id in cursosComun:
         evaluacionBuscada = Evaluacion.objects.filter(nombre = nombreEvaluacion, id_coordinacion = id).values_list('id',flat=True)
-        calificaciones =  Calificacion.objects.filter(id_evaluacion__id = evaluacionBuscada[0]).all().order_by('id_estudiante__rut')
+        calificaciones =  Calificacion.objects.filter(id_evaluacion__id = evaluacionBuscada[0]).all().order_by('id_estudiante')
         calificacionesDevolver.extend(CalificacionSerializer(calificaciones, many = "true").data)
     return Response(calificacionesDevolver) 
 
-#-- No probado
+#-- Funcionando
 ## secciones de una asignatura
 @api_view(['GET'])
 def getSeccionesAsignaturaJefeCarrera(request, idAsignatura = None):    
@@ -800,6 +812,7 @@ def getSeccionesAsignaturaJefeCarrera(request, idAsignatura = None):
 @api_view(['GET'])
 def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):    
     
+    #obtener jefe carrera a partir del id desde microservicio
     idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idJefeCarrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     nombreAsignaturas = []
     dataRechazados = []
@@ -819,13 +832,13 @@ def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):
         dataRevision.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'E').count())
     return Response([nombreAsignaturas,dataRechazados,dataPendientes,dataAceptados,dataRevision])
 
-#-- No probado
+#-- Probado, pero no devolvio ningun dato
 #-- Necesita modificaciones microservicios
 ## Solicitudes para el jefe de carrera dash
 @api_view(['GET'])
 def getCambioNotasDashboardJefeCarrera(request, idJefeCarrera = None):    
-    
-    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idJefeCarrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
+    id_jefeCarrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefeCarrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     cambios = []
     asignaturas = []
     for id in idsAsignatura:

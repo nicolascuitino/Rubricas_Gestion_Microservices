@@ -191,5 +191,28 @@ class Cambio_nota(models.Model):
     id_calificacion = models.ForeignKey(Calificacion, null = False, on_delete = models.CASCADE)
 
 
+# -----------------------------
+# Modelos de otros microservicios
 
+class Solicitud_Revision(models.Model):
+    id = models.PositiveIntegerField(primary_key=True,blank = False)
+    motivo = models.TextField(blank = False)
+    anterior_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True, blank=True)
+    actual_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True)
+    fecha_creacion = models.DateField(null = False)
+    archivoAdjunto = models.FileField(blank = True, null = True)
+    respuesta = models.TextField(blank = True, null = True, default = '')
+    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
+    estado = models.CharField(max_length = 1, choices = ESTADOS_SOLICITUD_CHOICES, blank = False, default = '')
+    id_estudiante = models.PositiveIntegerField(null = False)
+    id_docente = models.PositiveIntegerField( null = False)
+    id_evaluacion = models.PositiveIntegerField( null = False)
+    id_calificacion = models.PositiveIntegerField(null = True)
 
+    class Meta:
+        managed = False
+
+    def __str__(self):
+        return 'Solicitud de %s en la evaluacion %s' % (self.id_estudiante, self.id_evaluacion)
+
+    

@@ -17,6 +17,13 @@ def getEstudiante(request, idUsuario=None):
     print(infoEstudiante)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def getEstudiante_id(request, idEstudiante=None):
+    infoEstudiante = Estudiante.objects.filter(id = idEstudiante).first()
+    serializer = EstudianteSerializer(infoEstudiante)
+    print(infoEstudiante)
+    return Response(serializer.data)
+
 
 @api_view(['POST'])
 def postEstudiante(request):
