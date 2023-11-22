@@ -1,15 +1,29 @@
 version: '3.11.5'
 
 services:
-  web:
-    build: ./app
-    command: python manage.py runserver
-    volumes:
-      - ./app/:/usr/src/app/
-    ports:
-      - 8002:8002
-    depends_on:
-      - db
+  
+
   db:
     image: postgres:15
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: m_coordinadores
+
+  web:
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver
+    volumes:
+      - ./app/db:/var/lib/postgresql/data
+    ports:
+      - 8002:8002
+    
+
+    depends_on:
+      - db
  

@@ -29,7 +29,7 @@ class OnlySolicitudSerializer(serializers.Serializer):
     fecha_creacion = serializers.DateField(allow_null = False)
     archivoAdjunto = serializers.FileField(allow_null = True)
     respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
-    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    fecha_respuesta = serializers.DateField( allow_null = True)
     estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
     id_estudiante = serializers.IntegerField(allow_null = False)
     id_docente = serializers.IntegerField( allow_null = False)
@@ -165,7 +165,7 @@ class SolicitudSerializer(serializers.Serializer):
     fecha_creacion = serializers.DateField(allow_null = False)
     archivoAdjunto = serializers.FileField(allow_null = True)
     respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
-    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    fecha_respuesta = serializers.DateField( allow_null = True)
     estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
     class Meta:
        
@@ -205,7 +205,7 @@ class SolicitudRespuestaSerializer(serializers.Serializer):
     fecha_creacion = serializers.DateField(allow_null = False)
     archivoAdjunto = serializers.FileField(allow_null = True)
     respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
-    fecha_respuesta = serializers.DateField( allow_null = True, default = NULL)
+    fecha_respuesta = serializers.DateField( allow_null = True)
     estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
     id_docente = serializers.IntegerField( allow_null = False)
     class Meta:
@@ -248,12 +248,12 @@ class SolicitudesDocenteCursoSerializer(serializers.Serializer):
     #Solicitud
     id = serializers.IntegerField()
     anterior_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1)
-    actual_nota = models.DecimalField(max_digits = 2, decimal_places = 1, null = True)
-    fecha_creacion = models.DateField(null = False)
-    archivoAdjunto = models.FileField(blank = True, null = True)
-    respuesta = models.TextField(blank = True, null = True, default = '')
-    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
-    estado = models.CharField(max_length = 1, blank = False, default = '')
+    actual_nota = serializers.DecimalField(max_digits = 2, decimal_places = 1, allow_null = True)
+    fecha_creacion = serializers.DateField(allow_null = False)
+    archivoAdjunto = serializers.FileField(allow_null = True)
+    respuesta = serializers.CharField(allow_blank = True, allow_null = True, default = '')
+    fecha_respuesta = serializers.DateField( allow_null = True)
+    estado = serializers.CharField(max_length = 1, allow_blank = False, default = '')
 
     
     class Meta:
@@ -364,8 +364,13 @@ class EvaluacionDocenteSerializer(serializers.ModelSerializer):
         return DocenteSerializer(docente).data
 
 class CoordinacionDocenteCursoEspejoSerializer(serializers.ModelSerializer):
-    id_docente = DocenteSerializer()
+    #id_docente = DocenteSerializer()
+    id_docente = serializers.SerializerMethodField()
     id_coordinacion = CoordinacionSeccionSerializer()
     class Meta:
         model = Coordinacion_Docente    
         fields = '__all__'
+    
+    def get_id_docente(self, object):
+        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        return DocenteSerializer(docente).data

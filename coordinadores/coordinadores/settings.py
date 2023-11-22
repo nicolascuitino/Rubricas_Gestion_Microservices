@@ -82,6 +82,9 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '1234',
         'HOST': 'localhost',
+        #--Para docker
+        #'HOST': 'db',
+        #--
         'PORT': '5432',
     }
 }

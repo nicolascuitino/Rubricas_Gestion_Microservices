@@ -14,7 +14,7 @@ def hello(request):
 #obtiene solicitud que calce con un mismo id de solicitud
 def getSolicitud_id(request, idUsuario=None):
     infoSolicitudes = Solicitud_Revision.objects.filter(id = idUsuario).first()
-    serializer = Solicitud_Revision(infoSolicitudes)
+    serializer = OnlySolicitudSerializer(infoSolicitudes)
     print(infoSolicitudes)
     return Response(serializer.data)
 
@@ -22,6 +22,14 @@ def getSolicitud_id(request, idUsuario=None):
 #obtiene solicitudes que calcen con un mismo id_estudiante
 def getSolicitud_Estudiante(request, idUsuario=None):
     infoSolicitudes = Solicitud_Revision.objects.filter(id_estudiante = idUsuario)
+    serializer = OnlySolicitudSerializer(infoSolicitudes, many=True)
+    print(infoSolicitudes)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+#obtiene solicitudes que calcen con un mismo id_estudiante
+def getSolicitud_Docente(request, idUsuario=None):
+    infoSolicitudes = Solicitud_Revision.objects.filter(id_docente = idUsuario)
     serializer = OnlySolicitudSerializer(infoSolicitudes, many=True)
     print(infoSolicitudes)
     return Response(serializer.data)

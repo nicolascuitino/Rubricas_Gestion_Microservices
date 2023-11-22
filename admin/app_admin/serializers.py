@@ -20,7 +20,7 @@ class JefeCarreraSerializer(serializers.ModelSerializer):
         fields = ('id', 'rut', 'dig_verificador', 'id_usuario')
 
 class Subdirector_DocenteSerializer(serializers.ModelSerializer):
-    id_usuario = UsuariosSerializers()
+    #id_usuario = UsuariosSerializers()
     class Meta:
         model = Subdirector_Docente  
         fields = ('id', 'rut', 'dig_verificador', 'id_usuario')

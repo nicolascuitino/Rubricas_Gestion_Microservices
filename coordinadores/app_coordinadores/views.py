@@ -343,9 +343,8 @@ def getCoordinacionesAsignatura(request, idAsignatura = None):
     serializer = DocenteCursoSerializer(coordinacionesAsignatura, many = "true")
     return Response(serializer.data)
 
-#-- No funcionando
-#-- No probado
-#-- Necesita modificaciones microservicios
+#-- Funcionando
+#-- No entrega todos los datos serializer
 ## LUego de especificar la seccion se recogen las solicitudes de este curso-seccion id para ver la tabla Solicitud -> CursoInscrito
 @api_view(['GET'])
 def getSolicitudesCurso(request, idCoordinacion = None):
@@ -355,9 +354,16 @@ def getSolicitudesCurso(request, idCoordinacion = None):
     #evaluaciones = Evaluacion.objects.filter(id_coordinacion = idCoordinacion)
     #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
     #Se obtienen solicitudes cuya evaluacion coincida con el id_coordinacion 
-    solicitudesCurso = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion = idCoordinacion).all()
+    evaluacionesCurso = Evaluacion.objects.filter(id_coordinacion = idCoordinacion)
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    arraySolicitudes = []
+    for e in evaluacionesCurso:
+        for s in solicitudes:
+            if e.id == s["id_evaluacion"]:
+                arraySolicitudes.append(s)
+    #solicitudesCurso = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion = idCoordinacion).all()
     
-    serializer = SolicitudesDocenteCursoSerializer(solicitudesCurso, many="true")
+    serializer = SolicitudesDocenteCursoSerializer(arraySolicitudes, many="true")
     return Response(serializer.data)
 
 #-- Funcionando
@@ -372,18 +378,27 @@ def getAsignaturasJefeCarrera(request, idJefe = None):
     serializer = PlanesJefeSerializer(planesEstudio, many="true")
     return Response(serializer.data)
 
-#-- No Funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Solicitudes de una asignatura (Jefe de carrera)
 @api_view(['GET'])
 def getSolicitudesAsignaturaJefeCarrera(request, idAsignatura = None):
     ## ID asignatura seleccionado jefe de carrera
-    solicitudes = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).all()    
-    serializer = SolicitudSerializer(solicitudes, many="true")
+    #coordinacion_seccion.asignatura = asignatura, coordinacion_seccion.id = evaluacion.id, solicitud.id_evaluacion = evaluacion.id 
+
+    #solicitudes = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).all() 
+    evaluacionesAsignatura = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura).all()
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    arraySolicitudes = []
+    for e in evaluacionesAsignatura:
+        for s in solicitudes:
+            if e.id == s["id_evaluacion"]:
+                arraySolicitudes.append(s)
+    serializer = SolicitudSerializer(arraySolicitudes, many="true")
     ## Coordinaciones disponibles
-    coordinaciones = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_evaluacion__id_coordinacion__coordinacion',flat= True).distinct()
+    coordinaciones = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_coordinacion__coordinacion',flat= True).distinct()
     ## Secciones disponibles
-    secciones = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_evaluacion__id_coordinacion__seccion',flat= True).distinct()
+    secciones = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura).values_list('id_coordinacion__seccion',flat= True).distinct()
     return Response([serializer.data,coordinaciones,secciones])
     
 #-- Funcionando
@@ -438,11 +453,12 @@ def crudOneEvaluacion(request, idEvaluacion = None):
         serializer = PostEvaluacionSerializer(test)
         return Response(serializer.data)
     
-#-- No Funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getSolicitudesByIdDocente(request, idDocente):
-    solicitudes = Solicitud_Revision.objects.filter(id_docente__id = idDocente).order_by('fecha_creacion')
+    #solicitudes = Solicitud_Revision.objects.filter(id_docente__id = idDocente).order_by('fecha_creacion')
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitud_D/%s" % idDocente).json()
     serializer = SolicitudSerializer(solicitudes, many="true")
     return Response(serializer.data)
 
@@ -637,38 +653,128 @@ def getAllEvaluacionesMail(request):
     serializer = EvaluacionDocenteSerializer(evaluaciones, many="true")
     return Response(serializer.data)
 
-#-- No Funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardCoordinador(request, idUsuario = None):
-    numeroAsignaturas = Asignatura.objects.filter(id_coordinador__id_usuario = idUsuario).count()
-    evaluacionesPendientes = Evaluacion.objects.filter(estado = 'P', id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_coordinacion__isActive = True).count()
-    solicitudesActuales = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
-    solicitudesPendientes = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
-    solicitudesAprobadas = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
-    solicitudesRechazadas = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
-    solicitudesRevision = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'E').count()
+    idCoordinador = Coordinador.objects.filter(id_usuario = idUsuario).first().id
+    numeroAsignaturas = Asignatura.objects.filter(id_coordinador = idCoordinador).count()
+    evaluacionesPendientes = Evaluacion.objects.filter(estado = 'P', id_coordinacion__id_asignatura__id_coordinador = idCoordinador, id_coordinacion__isActive = True).count()
+
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    evaluacionesCoordinador = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id_coordinador = idCoordinador).all()
+    evaluacionesActivas = Evaluacion.objects.filter(id_coordinacion__isActive = True).all()
+    #obteniendo evaluaciones del coordinador
+    arrayEvaluaciones = []
+    for e in evaluacionesCoordinador:
+        for s in solicitudes:
+            if e.id == s["id_evaluacion"]:
+                arrayEvaluaciones.append(e)
+    
+    #obteniendo evaluaciones activas
+    arrayEvaluacionesActivas = []
+    for a in arrayEvaluaciones:
+        for activa in evaluacionesActivas:
+            if a.id == activa.id:
+                arrayEvaluacionesActivas.append(a)
+    
+    #obteniendo solicitudes de evaluaciones activas
+    arraySolicitudes = []
+    for a in arrayEvaluacionesActivas:
+        for s in solicitudes:
+            if a.id == s["id_evaluacion"]:
+                arraySolicitudes.append(s)
+
+    #solicitudesActuales = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
+    solicitudesActuales = len(arraySolicitudes)
+    
+    #---
+    #solicitudesPendientes = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
+    solicitudesPendientes = 0
+    for e in arraySolicitudes:
+        if e["estado"] == 'P':
+            solicitudesPendientes = solicitudesPendientes + 1
+    #---
+    #solicitudesAprobadas = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
+    solicitudesAprobadas = 0
+    for e in arraySolicitudes:
+        if e["estado"] == 'A':
+            solicitudesAprobadas = solicitudesAprobadas + 1
+    #---
+    #solicitudesRechazadas = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
+    solicitudesRechazadas = 0
+    for e in arraySolicitudes:
+        if e["estado"] == 'R':
+            solicitudesRechazadas = solicitudesRechazadas + 1
+    #---
+    #solicitudesRevision = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id_coordinador__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'E').count()
+    solicitudesRevision = 0
+    for e in arraySolicitudes:
+        if e["estado"] == 'E':
+            solicitudesRevision = solicitudesRevision + 1
 
     return Response([numeroAsignaturas, evaluacionesPendientes, solicitudesActuales, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas,solicitudesRevision])
 
-#-- No Funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardEstudiante(request, idUsuario = None):
-    cursosActuales = Coordinacion_Estudiante.objects.filter(id_estudiante__id_usuario = idUsuario, id_coordinacion__isActive = True).all()
+    idEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()["id"]
+    cursosActuales = Coordinacion_Estudiante.objects.filter(id_estudiante = idEstudiante, id_coordinacion__isActive = True).all()
     serializer = CoordinacionEstudianteSerializer(cursosActuales, many = "true")
     
-    solTotales = Solicitud_Revision.objects.filter(Q(estado = 'A') | Q(estado = 'R'), id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).all().order_by('-fecha_respuesta')
+    #solTotales = Solicitud_Revision.objects.filter(Q(estado = 'A') | Q(estado = 'R'), id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).all().order_by('-fecha_respuesta')
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solEstudiante = []
+    for s in solicitudes:
+        if s["id_estudiante"] == idEstudiante:
+            solEstudiante.append(s)
+    
+    solTotales = []
+    for s in solEstudiante:
+        if s["estado"] == 'A' or s["estado"] == 'R':
+            solTotales.append(s)
     serializerTwo = SolicitudSerializer(solTotales, many = "true")
-    solicitudesRealizadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
-    solicitudesPendientes = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
-    solicitudesAprobadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
-    solicitudesRechazadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
-    solicitudesRevision = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'E').count()
+    #---
+    #obteniendo solicitudes activas del estudiante
+    evaluacionesActivas = Evaluacion.objects.filter(id_coordinacion__isActive = True).all()
+    solActivas = []
+    for a in solEstudiante:
+        for activa in evaluacionesActivas:
+            if a["id_evaluacion"] == activa.id:
+                solActivas.append(a)
+    
+
+    #solicitudesRealizadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
+    solicitudesRealizadas = len(solActivas)
+    #---
+    #solicitudesPendientes = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
+    solicitudesPendientes = 0
+    for e in solActivas:
+        if e["estado"] == 'P':
+            solicitudesPendientes = solicitudesPendientes + 1
+    #--
+    #solicitudesAprobadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
+    solicitudesAprobadas = 0
+    for e in solActivas:
+        if e["estado"] == 'A':
+            solicitudesAprobadas = solicitudesAprobadas + 1
+    #---
+    #solicitudesRechazadas = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
+    solicitudesRechazadas = 0
+    for e in solActivas:
+        if e["estado"] == 'R':
+            solicitudesRechazadas = solicitudesRechazadas + 1
+    #---
+    #solicitudesRevision = Solicitud_Revision.objects.filter(id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'E').count()
+    solicitudesRevision = 0
+    for e in solActivas:
+        if e["estado"] == 'E':
+            solicitudesRevision = solicitudesRevision + 1
 
     return Response([serializer.data, solicitudesRevision, solicitudesRealizadas, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas, serializerTwo.data])
 
-#-- No funcionando
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardJefeCarrera(request, idUsuario = None):
@@ -676,29 +782,77 @@ def getInfoDashboardJefeCarrera(request, idUsuario = None):
     id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idUsuario).json()["id"]
     #id_jefe_carrera = Jefe_Carrera.objects.filter(id_usuario = idUsuario).first().id
     id_Carrera = Carrera.objects.filter(id_jefeCarrera = id_jefe_carrera).first().id
-    id_plan_estudio = Plan_Estudio.objects.filter(id_carrera = id_Carrera).first().id
+    plan_estudio = Plan_Estudio.objects.filter(id_carrera = id_Carrera)
     estudiantesEnCarrera = 0
+    arrayEstudiantesCarrera = []
     for estudiante in estudiantes:
-        if estudiante["id_planEstudio"] == id_plan_estudio:
-            estudiantesenCarrera = estudiantesenCarrera + 1
+        for plan in plan_estudio: 
+            if estudiante["id_planEstudio"] == plan.id:
+                estudiantesEnCarrera = estudiantesEnCarrera + 1
+                arrayEstudiantesCarrera.append(estudiante)
+    
+    #Obtener solicitudes de todos los estudiantes de la carrera
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solEstudiante = []
+    for s in solicitudes:
+        for e in arrayEstudiantesCarrera:
+            if s["id_estudiante"] == e["id"]:
+                solEstudiante.append(s)
+    #Obteniendo solicitudes activas de carrera
+    evaluacionesActivas = Evaluacion.objects.filter(id_coordinacion__isActive = True).all()
+    solActivas = []
+    for a in solEstudiante:
+        for activa in evaluacionesActivas:
+            if a["id_evaluacion"] == activa.id:
+                solActivas.append(a)
 
     #estudiantesEnCarrera = Estudiante.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario).count()
-    solicitudesSemestre = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
-    solicitudesPendientes = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
-    solicitudesAprobadas = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
-    solicitudesRechazadas = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
-    notasCambiadas = Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_calificacion__id_evaluacion__id_coordinacion__isActive = True).count()
+    #solicitudesSemestre = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).count()
+    solicitudesSemestre = len(solActivas)
+    #---
+    #solicitudesPendientes = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'P').count()
+    solicitudesPendientes = 0
+    for e in solActivas:
+        if e["estado"] == 'P':
+            solicitudesPendientes = solicitudesPendientes + 1
+    #---
+    #solicitudesAprobadas = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'A').count()
+    solicitudesAprobadas = 0
+    for e in solActivas:
+        if e["estado"] == 'A':
+            solicitudesAprobadas = solicitudesAprobadas + 1
+    #---
+    #solicitudesRechazadas = Solicitud_Revision.objects.filter(id_estudiante__id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True, estado = 'R').count()
+    solicitudesRechazadas = 0
+    for e in solActivas:
+        if e["estado"] == 'R':
+            solicitudesRechazadas = solicitudesRechazadas + 1
+    #---
+    #notasCambiadas = Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera = id_Carrera, id_calificacion__id_evaluacion__id_coordinacion__isActive = True).count()
+    notasCambiadasAll = Cambio_nota.objects.all()
+    calificaciones = Calificacion.objects.all()
+    calificacionesEstudiantes = []
+    for c in calificaciones:
+        for e in arrayEstudiantesCarrera:
+            if c.id_estudiante == e["id"]:
+                calificacionesEstudiantes.append(c)
+    notasCambiadas = 0
+    for i in notasCambiadasAll:
+        for c in calificacionesEstudiantes:
+            if i.id_calificacion_id == c.id:
+                notasCambiadas = notasCambiadas + 1
 
     return Response([estudiantesEnCarrera, solicitudesSemestre, solicitudesPendientes, solicitudesAprobadas, solicitudesRechazadas, notasCambiadas])
 
 
-#-- No funcionando
+#-- Funcionando
 @api_view(['GET'])
 def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuario = None):
     # Funcionando.
     if request.method == 'GET':
         ## Lista con los cursos asociados a ese horario y al id del docente
-        cursos = Coordinacion_Docente.objects.filter(id_docente__id_usuario__id = idUsuario, id_coordinacion__bloques_horario = bloqueHorario).values_list('id_coordinacion__id', flat= True)
+        infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+        cursos = Coordinacion_Docente.objects.filter(id_docente = infoDocente["id"], id_coordinacion__bloques_horario = bloqueHorario).values_list('id_coordinacion__id', flat= True)
         ##evaluacionCoordinacion = Evaluacion.objects.filter(id_coordinacion__id = cursos).distinct('nombre').all()
         evaluaciones = []
         ## Significa que existe por lo menos un curso
@@ -718,12 +872,13 @@ def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuari
                     evaluaciones[index].extend(EvaluacionSerializer(evaluacionesPorNombre, many = "true").data)
         return Response(evaluaciones)
 
-#-- No funcionando
+#-- Funcionando
 @api_view(['GET']) ## Cambio a bloque horario - antes id, se agrega distinct
 def informacionCoordinacionCursoEspejo(request, idUsuario = None ,bloqueHorario = None):
-    coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id_usuario__id = idUsuario).distinct('id_coordinacion__bloques_horario')
+    infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = infoDocente["id"]).distinct('id_coordinacion__bloques_horario')
     serializerUnico = CoordinacionDocenteCursoEspejoSerializer(coordinacion, many = "true")
-    coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente__id_usuario__id = idUsuario).all()
+    coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = infoDocente["id"]).all()
     serializer = CoordinacionDocenteCursoEspejoSerializer(coordinacion, many = "true")
     return Response([serializerUnico.data,serializer.data])
 
@@ -806,33 +961,76 @@ def getSeccionesAsignaturaJefeCarrera(request, idAsignatura = None):
 
     return Response(arregloInformacion)
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Solicitudes para el jefe de carrera dash
 @api_view(['GET'])
 def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):    
     
     #obtener jefe carrera a partir del id desde microservicio
-    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idJefeCarrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
+    id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()["id"]
+    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_carrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     nombreAsignaturas = []
     dataRechazados = []
     dataPendientes = []
     dataAceptados = []
     dataRevision = []
     #SolicitudSerializer
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    coordinaciones = Coordinacion_Seccion.objects.filter()
     for id in idsAsignatura:
         nombre = Asignatura.objects.filter(id = id).values_list('nombre',flat= True)
         #nombre = solicitud.values_list('id_evaluacion__id_coordinacion__id_asignatura__nombre')
         # Se agrega nombre de la asignatura
         nombreAsignaturas.extend(nombre)
         # Se cuentan las solicitudes pendientes de esa asignatura
-        dataPendientes.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'P').count())
-        dataRechazados.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'R').count())
-        dataAceptados.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'A').count())
-        dataRevision.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'E').count())
+        coordinaciones = Coordinacion_Seccion.objects.filter(id_asignatura = id)
+        evaluaciones = Evaluacion.objects.all()
+        evaluacionesCoordinacion = []
+        for c in coordinaciones:
+            for e in evaluaciones:
+                if c.id == e.id_coordinacion_id:
+                    evaluacionesCoordinacion.append(e)
+
+        sol = []
+        for e in evaluacionesCoordinacion:
+            for s in solicitudes:
+                if e.id == s["id_evaluacion"]:
+                    sol.append(s)
+
+        solicitudesPendientes = 0
+        for e in sol:
+            if e["estado"] == 'P':
+                solicitudesPendientes = solicitudesPendientes + 1
+        #dataPendientes.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'P').count())
+        dataPendientes.append(solicitudesPendientes)
+        
+        #---
+        #dataRechazados.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'R').count())
+        solicitudesRechazados = 0
+        for e in sol:
+            if e["estado"] == 'R':
+                solicitudesRechazados = solicitudesRechazados + 1
+        dataRechazados.append(solicitudesRechazados)
+
+        #---
+        #dataAceptados.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'A').count())
+        solicitudesAceptados = 0
+        for e in sol:
+            if e["estado"] == 'A':
+                solicitudesAceptados = solicitudesAceptados + 1
+        dataAceptados.append(solicitudesAceptados)
+        #---
+        solicitudesRevision = 0
+        for e in sol:
+            if e["estado"] == 'E':
+                solicitudesRevision = solicitudesRevision + 1
+
+        #dataRevision.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = id, estado = 'E').count())
+        dataRevision.append(solicitudesRevision)
     return Response([nombreAsignaturas,dataRechazados,dataPendientes,dataAceptados,dataRevision])
 
-#-- Probado, pero no devolvio ningun dato
+#-- Funcionando, pero no devolvio ningun dato
 #-- Necesita modificaciones microservicios
 ## Solicitudes para el jefe de carrera dash
 @api_view(['GET'])
@@ -843,34 +1041,84 @@ def getCambioNotasDashboardJefeCarrera(request, idJefeCarrera = None):
     asignaturas = []
     for id in idsAsignatura:
         cantidad = Cambio_nota.objects.filter(id_calificacion__id_evaluacion__id_coordinacion__id_asignatura__id = id).count()
+        #print(cantidad)
+        #print(idsAsignatura)
         if cantidad != 0:
             nombre = Asignatura.objects.filter(id = id).values_list('nombre',flat= True)
             asignaturas.append(nombre[0])
             cambios.append(cantidad)
     return Response([cambios,asignaturas])
 
-#-- No probado
+#-- Funcionando
 @api_view(['GET'])
 def getAllCalificacionesByCurso(request, codigoAsig = None):
     calificaciones = Calificacion.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__codigo = codigoAsig).all()
     serializer = CalificacionSerializer(calificaciones, many="true")
     return Response(serializer.data)
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ##Todas los cambios de nota en un semestre activo de un departamento correspondiente
 @api_view(['GET'])
 def getInfoDashboardAutoridadSub(request, idAutoridad = None):
     info = []
     ## n cambios notas en semestre
-    info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, id_calificacion__id_evaluacion__id_coordinacion__isActive = True).count())
+    #cambionota.idcalificacion = idcalificacion, calificacion.idestudiante = id_estudiante, id_planestudio
+    infoEstudiantes = requests.get("http://127.0.0.1:8000/estudiante/all").json() 
+    id_Subdirector_info = requests.get("http://127.0.0.1:8004/subdirector_docente/%s" % idAutoridad).json()
+    planesEstudio = Plan_Estudio.objects.filter(id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"])
+    
+    estudiantesPlanEstudio = []
+    for e in infoEstudiantes:
+        for p in planesEstudio:
+            if e["id_planEstudio"] == p.id:
+                estudiantesPlanEstudio.append(e)
+  
+    calificacionesEstudiantes = []
+    calificacionesActivas = Calificacion.objects.filter(id_evaluacion__id_coordinacion__isActive = True)
+    for c in calificacionesActivas:
+        for e in estudiantesPlanEstudio:
+            if c.id_estudiante == e["id"]:
+                calificacionesEstudiantes.append(c)
+
+    cambiosNota = Cambio_nota.objects.all()
+    count = 0
+    for c in calificacionesEstudiantes:
+        for ca in cambiosNota:
+            if c.id == ca.id_calificacion_id:
+                count = count + 1
+                #info.append(Cambio_nota.objects.filter(id_calificacion = e["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True).count())
+    info.append(count)
+    count = 0
+    for c in calificacionesEstudiantes:
+        for ca in cambiosNota:
+            if c.id == ca.id_calificacion_id and ca.anterior_nota < 4 and ca.actual_nota > 4:
+                count = count + 1    
+
+    info.append(count)
+    count = 0
+    for c in calificacionesEstudiantes:
+        for ca in cambiosNota:
+            if c.id == ca.id_calificacion_id and ca.anterior_nota > 4 and ca.actual_nota < 4:
+                count = count + 1    
+    info.append(count)
+    
     ## n cambios notas a azules
-    info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__lt = 4, actual_nota__gte = 4).count())
+    #info.append(Cambio_nota.objects.filter(id_calificacion = e["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__lt = 4, actual_nota__gte = 4).count())
+    
+
     ## n cambios notas a rojos
-    info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__gte = 4, actual_nota__lt = 4).count())
+    #info.append(Cambio_nota.objects.filter(id_calificacion = e["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__gte = 4, actual_nota__lt = 4).count())
+
+  
+    #info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True).count())
+    ## n cambios notas a azules
+    #info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__lt = 4, actual_nota__gte = 4).count())
+    ## n cambios notas a rojos
+    #info.append(Cambio_nota.objects.filter(id_calificacion__id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"], id_calificacion__id_evaluacion__id_coordinacion__isActive = True, anterior_nota__gte = 4, actual_nota__lt = 4).count())
     
     ##obtengo asignaturas correspondientes autoridad
-    relacionAsignaturaPlanEstudio = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad)
+    relacionAsignaturaPlanEstudio = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"])
     asignaturas = Asignatura.objects.all()
     asignaturasAutoridad = []
     for relacion in relacionAsignaturaPlanEstudio:
@@ -892,14 +1140,58 @@ def getInfoDashboardAutoridadSub(request, idAutoridad = None):
         nCambiosFecha += Cambio_Fecha.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_evaluacion__id_coordinacion__id_asignatura = asignatura.id).count()
     info.append(nCambiosFecha)
 
+    coordinacionesAutoridad = []
+    coordinaciones = Coordinacion_Seccion.objects.all()
+    for id in asignaturasAutoridad:
+        for c in coordinaciones:
+            if id.id == c.id_asignatura_id:
+                coordinacionesAutoridad.append(c)
+
+
+   
+    evaluaciones = Evaluacion.objects.all()
+    evaluacionesAutoridad = []
+    for c in coordinacionesAutoridad:
+        for e in evaluaciones:
+            if c.id == e.id_coordinacion_id and c.isActive == True:
+                evaluacionesAutoridad.append(e)
+
+    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    sol = []
+    for e in evaluacionesAutoridad:
+        for s in solicitudes:
+            if e.id == s["id_evaluacion"]:
+                sol.append(s)
+
+    
+
+    
     ## n Solicitudes
-    info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad).count())
+    #info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad).count())
+    info.append(len(sol))
     ## n Solicitudes P
-    info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'P').count())
+    #info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'P').count())
+
+    solicitudesPendientes = 0
+    for e in sol:
+        if e["estado"] == 'P':
+            solicitudesPendientes = solicitudesPendientes + 1
+    info.append(solicitudesPendientes)
     ## n solicitudes A
-    info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'A').count())
+    #info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'A').count())
+    solicitudesA = 0
+    for e in sol:
+        if e["estado"] == 'P':
+            solicitudesA = solicitudesA + 1
+    info.append(solicitudesA)
     ## n Solicitudes R
-    info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'R').count())
+    #info.append(Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__isActive = True, id_estudiante__id_planEstudio__id_carrera__id_departamento__id_subdirector__id_usuario = idAutoridad, estado = 'R').count())
+
+    solicitudesR = 0
+    for e in sol:
+        if e["estado"] == 'R':
+            solicitudesR = solicitudesR + 1
+    info.append(solicitudesR)
 
     ## Retorno
     # ## n cambios notas en semestre
@@ -914,13 +1206,13 @@ def getInfoDashboardAutoridadSub(request, idAutoridad = None):
     
     return Response(info)
     
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Cambio fecha para el jefe de carrera dash
 @api_view(['GET'])
 def getCambioFechaDashboardJefeCarrera(request, idJefeCarrera = None):    
-    
-    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idJefeCarrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
+    id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_Carrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     cambios = []
     asignaturas = []
     for id in idsAsignatura:
@@ -931,13 +1223,13 @@ def getCambioFechaDashboardJefeCarrera(request, idJefeCarrera = None):
             cambios.append(cantidad)
     return Response([cambios,asignaturas])
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Atrasos segun asignatura para el jefe de carrera dash
 @api_view(['GET'])
 def getAtrasosDashboardJefeCarrera(request, idJefeCarrera = None):    
-    
-    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera__id_usuario = idJefeCarrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
+    id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_Carrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     atrasos = []
     asignaturas = []
     for id in idsAsignatura:
@@ -949,13 +1241,13 @@ def getAtrasosDashboardJefeCarrera(request, idJefeCarrera = None):
             atrasos.append(cantidad)
     return Response([atrasos,asignaturas])
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## Atrasos segun coordinaciones del coordinador dash
 @api_view(['GET'])                                                                                                                                                                                          
 def getAtrasosDashboardCoordinador(request, idCoordinador = None):    
-    
-    idsCoordinaciones = Coordinacion_Seccion.objects.filter(id_asignatura__id_coordinador__id_usuario__id = idCoordinador).distinct('id').values_list('id', flat= True)
+    id_info_Coordinador = Coordinador.objects.filter(id_usuario = idCoordinador).first().id
+    idsCoordinaciones = Coordinacion_Seccion.objects.filter(id_asignatura__id_coordinador = id_info_Coordinador).distinct('id').values_list('id', flat= True)
     atrasos = []    
     secciones = []
     for id in idsCoordinaciones:
@@ -969,13 +1261,13 @@ def getAtrasosDashboardCoordinador(request, idCoordinador = None):
             atrasos.append(cantidad)
     return Response([atrasos,secciones])
 
-#-- No probado
+#-- Funcionando
 #-- Necesita modificaciones microservicios
 ## cambio de fecha segun coordinaciones del coordinador dash
 @api_view(['GET'])                                                                                                                                                                                          
 def getCambioNotasDashboardCoordinador(request, idCoordinador = None):    
-    
-    idsCoordinaciones = Coordinacion_Seccion.objects.filter(id_asignatura__id_coordinador__id_usuario__id = idCoordinador).distinct('id').values_list('id', flat= True)
+    id_info_Coordinador = Coordinador.objects.filter(id_usuario = idCoordinador).first().id
+    idsCoordinaciones = Coordinacion_Seccion.objects.filter(id_asignatura__id_coordinador = id_info_Coordinador).distinct('id').values_list('id', flat= True)
     cambios = []    
     secciones = []
     for id in idsCoordinaciones:
