@@ -9,11 +9,11 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: m_coordinadores
 
   web:
-    tty: true
+    tty: true 
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,8 +22,6 @@ services:
       - ./app/db:/var/lib/postgresql/data
     ports:
       - 8002:8002
-    
-
     depends_on:
       - db
  
