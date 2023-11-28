@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from django.conf import settings
 from django.db import models
 from .choices import COMPONENTES_CHOICES, ESTADOS_EVALUACION_CHOICES, ESTADOS_SOLICITUD_CHOICES, SEMESTRES_CHOICES
