@@ -13,11 +13,14 @@ services:
       POSTGRES_DB: m_coordinadores
 
   web:
+    restart: always
     tty: true 
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py runserver
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8002"
     volumes:
       - ./app/db:/var/lib/postgresql/data
     ports:

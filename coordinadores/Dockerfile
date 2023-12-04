@@ -6,6 +6,12 @@ WORKDIR /app
 #Copia el archivo requirements.txt al contenedor en /app/
 COPY requirements.txt /app/
 
+# install psycopg dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Instala las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -16,7 +22,7 @@ COPY . /app/
 EXPOSE 8002
 
 #Comando para ejecutar la aplicación cuando el contenedor se inicia
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
 
 #comandos:
 #imagen django:
