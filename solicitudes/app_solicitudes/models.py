@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from django.conf import settings
 from django.db import models
 from django.core.validators import MinLengthValidator
@@ -13,7 +12,7 @@ class Solicitud_Revision(models.Model):
     fecha_creacion = models.DateField(null = False)
     archivoAdjunto = models.FileField(blank = True, null = True)
     respuesta = models.TextField(blank = True, null = True, default = '')
-    fecha_respuesta = models.DateField(blank = True, null = True, default = NULL)
+    fecha_respuesta = models.DateField(blank = True, null = True)
     estado = models.CharField(max_length = 1, choices = ESTADOS_SOLICITUD_CHOICES, blank = False, default = '')
     id_estudiante = models.PositiveIntegerField(null = False)
     id_docente = models.PositiveIntegerField( null = False)
