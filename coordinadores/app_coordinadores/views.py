@@ -61,7 +61,8 @@ def updateCoordinador(request, idUsuario=None):
 #--Funcionando
 @api_view(['GET'])
 def getDocente(request, idUsuario = None):
-    infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    #infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    infoDocente = requests.get("http://docente:8001/docente/%s" % idUsuario).json()
     serializer = DocenteSerializer(infoDocente)
     return Response(serializer.data)
 
@@ -87,7 +88,8 @@ def getDocente(request, idUsuario = None):
 @api_view(['GET'])
 def getCalificacionesEstudiante(request, idUsuario = None):
     #calificacion.id_estudiante -> id_usuario = idUsuario,
-    infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json() 
+    #infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    infoEstudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json()  
     calificaciones = Calificacion.objects.filter(id_estudiante = infoEstudiante["id"], id_evaluacion__id_coordinacion__id_semetre__isActual = True).all().order_by('-fecha_entrega')
     print(calificaciones)
     serializer = CalificacionSerializer(calificaciones, many = "true")
@@ -99,7 +101,8 @@ def getCalificacionesEstudiante(request, idUsuario = None):
 def getDataAsignatura(request, codigo = None, idUsuario = None):
 
     ## Buscar la coordinacion del curso de teoria con el codigo y id del usuario - verificar que existe seccion del estudiante
-    infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json() 
+    #infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    infoEstudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json() 
     ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "T", id_estudiante = infoEstudiante["id"]).values_list('id_coordinacion__id',flat=True)
     if ids_coordinacion.count() != 0:
 
@@ -112,7 +115,8 @@ def getDataAsignatura(request, codigo = None, idUsuario = None):
         idsCalificacionesConSolicitudes = [] # Arreglo a devolver
         
         for id in idsCalificacionSolicitudes:
-            solicitudes = requests.get("http://127.0.0.1:8003/solicitud_C/%s" % id).json()
+            #solicitudes = requests.get("http://127.0.0.1:8003/solicitud_C/%s" % id).json()
+            solicitudes = requests.get("http://solicitud:8003/solicitud_C/%s" % id).json()
             #solicitud = Solicitud_Revision.objects.filter(id_calificacion = id).values_list('id_calificacion', flat=True) # buscar si existe esa calificacion en alguna solicitud
             for solicitud in solicitudes:
                 if solicitud["id_calificacion"] == id:
@@ -140,7 +144,8 @@ def getDataAsignatura(request, codigo = None, idUsuario = None):
 @api_view(['GET'])
 def getDataAsignaturaLab(request, codigo = None, idUsuario = None):
     ## Buscar la coordinacion del curso de teoria con el codigo y id del usuario - verificar que existe seccion del estudiante
-    infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    #infoEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    infoEstudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json()
     ids_coordinacion = Coordinacion_Estudiante.objects.filter(id_coordinacion__id_asignatura__codigo = codigo, id_coordinacion__id_asignatura__componente = "L", id_estudiante = infoEstudiante["id"]).values_list('id_coordinacion__id',flat=True)
     if ids_coordinacion.count() != 0:
 
@@ -152,7 +157,8 @@ def getDataAsignaturaLab(request, codigo = None, idUsuario = None):
         idsCalificacionSolicitudes =  calificaciones.values_list('id',flat=True) ## Obtener ids de las calificaciones existentes
         idsCalificacionesConSolicitudes = [] # Arreglo a devolver
         for id in idsCalificacionSolicitudes:
-            solicitudes = requests.get("http://127.0.0.1:8003/solicitud_C/%s" % id).json()
+            #solicitudes = requests.get("http://127.0.0.1:8003/solicitud_C/%s" % id).json()
+            solicitudes = requests.get("http://solicitud:8003/solicitud_C/%s" % id).json()
             #solicitud = Solicitud_Revision.objects.filter(id_calificacion = id).values_list('id_calificacion', flat=True) # buscar si existe esa calificacion en alguna solicitud
             for solicitud in solicitudes:
                 if solicitud["id_calificacion"] == id:
@@ -190,9 +196,11 @@ def getDataSolicitudApelacion(request, idCalificacion = None):
 def dataSolicitud(request, idUsuario = None, idSolicitud = None):
     if request.method == 'GET':
         #solicitudes = Solicitud_Revision.objects.filter(id_estudiante__id_usuario__id = idUsuario).all().order_by('fecha_creacion')
-        estudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+        #estudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+        estudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json()
         #estudiante = EstudianteSerializer(estudiante)
-        solicitudes = requests.get("http://127.0.0.1:8003/solicitud_E/%s" % estudiante["id"]).json()
+        #solicitudes = requests.get("http://127.0.0.1:8003/solicitud_E/%s" % estudiante["id"]).json()
+        solicitudes = requests.get("http://solicitud:8003/solicitud_E/%s" % estudiante["id"]).json()
         #for s in solicitudes:
         #    Solicitud_Revision.objects.create(id=s["id"], motivo=s["motivo"],
         #                                      anterior_nota=s["anterior_nota"], actual_nota=s["actual_nota"],
@@ -207,12 +215,14 @@ def dataSolicitud(request, idUsuario = None, idSolicitud = None):
     
     if request.method == 'PUT':
         #solicitud = Solicitud_Revision.objects.filter(id = idSolicitud).first()
-        solicitud = requests.get("http://127.0.0.1:8003/solicitud_I/%s" % idSolicitud).json()
+        #solicitud = requests.get("http://127.0.0.1:8003/solicitud_I/%s" % idSolicitud).json()
+        solicitud = requests.get("http://solicitud:8003/solicitud_I/%s" % idSolicitud).json()
         solicitud = OnlySolicitudSerializer(solicitud)
         solicitud_actualizada = OnlySolicitudSerializer(solicitud, data = request.data)
         if solicitud_actualizada.is_valid():
             #solicitud_actualizada.save()
-            requests.put("http://127.0.0.1:8003/solicitud/update/%s" % idSolicitud, data= solicitud_actualizada.data)
+            #requests.put("http://127.0.0.1:8003/solicitud/update/%s" % idSolicitud, data= solicitud_actualizada.data)
+            requests.put("http://solicitud:8003/solicitud/update/%s" % idSolicitud, data= solicitud_actualizada.data)
             return Response(solicitud_actualizada.data)
         return Response(solicitud_actualizada.errors)
 
@@ -226,7 +236,8 @@ def dataSolicitud(request, idUsuario = None, idSolicitud = None):
 #--Funcionando
 @api_view(['GET'])
 def getCursosByEstudiante(request, idUsuario = None):
-    estudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    #estudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()
+    estudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json()
     cursos = Coordinacion_Estudiante.objects.filter(id_estudiante = estudiante["id"]).distinct('id_coordinacion__id_asignatura__codigo')
     serializer = CoordinacionEstudianteSerializer(cursos, many="true")
     return Response(serializer.data)
@@ -235,7 +246,8 @@ def getCursosByEstudiante(request, idUsuario = None):
 @api_view(['GET'])
 def getCursosByDocente(request, idUsuario = None):
     ## Se cambio de order_by a distinct por bloque de horario para cursos espejo
-    docente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    #docente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    docente = requests.get("http://docente:8001/docente/%s" % idUsuario).json()
     print(docente)
     cursosDocente = Coordinacion_Docente.objects.filter(id_docente = docente["id"], id_coordinacion__isActive = True).distinct('id_coordinacion__bloques_horario')
     serializer = CoordinacionDocenteSerializer(cursosDocente, many="true")
@@ -249,7 +261,8 @@ def getCursosByDocente(request, idUsuario = None):
 def getDataSolicitudRespuesta(request,idEstudiante = None, idEvaluacion = None):
     ## Solicitud segun ID estudiante y ID evaluacion
     #solicitudes = Solicitud_Revision.objects.filter(id_estudiante__id = idEstudiante, id_evaluacion__id = idEvaluacion).all()
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitud_EE/%s/%s" % (idEstudiante, idEvaluacion)).json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitud_EE/%s/%s" % (idEstudiante, idEvaluacion)).json()
+    solicitudes = requests.get("http://solicitud:8003/solicitud_EE/%s/%s" % (idEstudiante, idEvaluacion)).json()
     serializer = SolicitudRespuestaSerializer(solicitudes, many = "true")
     return Response(serializer.data)
 
@@ -355,7 +368,8 @@ def getSolicitudesCurso(request, idCoordinacion = None):
     #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
     #Se obtienen solicitudes cuya evaluacion coincida con el id_coordinacion 
     evaluacionesCurso = Evaluacion.objects.filter(id_coordinacion = idCoordinacion)
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     arraySolicitudes = []
     for e in evaluacionesCurso:
         for s in solicitudes:
@@ -388,7 +402,8 @@ def getSolicitudesAsignaturaJefeCarrera(request, idAsignatura = None):
 
     #solicitudes = Solicitud_Revision.objects.filter(id_evaluacion__id_coordinacion__id_asignatura__id = idAsignatura).all() 
     evaluacionesAsignatura = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id = idAsignatura).all()
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     arraySolicitudes = []
     for e in evaluacionesAsignatura:
         for s in solicitudes:
@@ -458,7 +473,8 @@ def crudOneEvaluacion(request, idEvaluacion = None):
 @api_view(['GET'])
 def getSolicitudesByIdDocente(request, idDocente):
     #solicitudes = Solicitud_Revision.objects.filter(id_docente__id = idDocente).order_by('fecha_creacion')
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitud_D/%s" % idDocente).json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitud_D/%s" % idDocente).json()
+    solicitudes = requests.get("http://solicitud:8003/solicitud_D/%s" % idDocente).json()
     serializer = SolicitudSerializer(solicitudes, many="true")
     return Response(serializer.data)
 
@@ -661,7 +677,8 @@ def getInfoDashboardCoordinador(request, idUsuario = None):
     numeroAsignaturas = Asignatura.objects.filter(id_coordinador = idCoordinador).count()
     evaluacionesPendientes = Evaluacion.objects.filter(estado = 'P', id_coordinacion__id_asignatura__id_coordinador = idCoordinador, id_coordinacion__isActive = True).count()
 
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     evaluacionesCoordinador = Evaluacion.objects.filter(id_coordinacion__id_asignatura__id_coordinador = idCoordinador).all()
     evaluacionesActivas = Evaluacion.objects.filter(id_coordinacion__isActive = True).all()
     #obteniendo evaluaciones del coordinador
@@ -719,12 +736,14 @@ def getInfoDashboardCoordinador(request, idUsuario = None):
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardEstudiante(request, idUsuario = None):
-    idEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()["id"]
+    #idEstudiante = requests.get("http://127.0.0.1:8000/estudiante/%s" % idUsuario).json()["id"]
+    idEstudiante = requests.get("http://student:8000/estudiante/%s" % idUsuario).json()["id"]
     cursosActuales = Coordinacion_Estudiante.objects.filter(id_estudiante = idEstudiante, id_coordinacion__isActive = True).all()
     serializer = CoordinacionEstudianteSerializer(cursosActuales, many = "true")
     
     #solTotales = Solicitud_Revision.objects.filter(Q(estado = 'A') | Q(estado = 'R'), id_estudiante__id_usuario = idUsuario, id_evaluacion__id_coordinacion__isActive = True).all().order_by('-fecha_respuesta')
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     solEstudiante = []
     for s in solicitudes:
         if s["id_estudiante"] == idEstudiante:
@@ -778,8 +797,10 @@ def getInfoDashboardEstudiante(request, idUsuario = None):
 #-- Necesita modificaciones microservicios
 @api_view(['GET'])
 def getInfoDashboardJefeCarrera(request, idUsuario = None):
-    estudiantes = requests.get("http://127.0.0.1:8000/estudiante/all").json()
-    id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idUsuario).json()["id"]
+    #estudiantes = requests.get("http://127.0.0.1:8000/estudiante/all").json()
+    estudiantes = requests.get("http://student:8000/estudiante/all").json()
+    #id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idUsuario).json()["id"]
+    id_jefe_carrera = requests.get("http://admin:8004/jefe_carrera/%s" % idUsuario).json()["id"]
     #id_jefe_carrera = Jefe_Carrera.objects.filter(id_usuario = idUsuario).first().id
     id_Carrera = Carrera.objects.filter(id_jefeCarrera = id_jefe_carrera).first().id
     plan_estudio = Plan_Estudio.objects.filter(id_carrera = id_Carrera)
@@ -792,7 +813,8 @@ def getInfoDashboardJefeCarrera(request, idUsuario = None):
                 arrayEstudiantesCarrera.append(estudiante)
     
     #Obtener solicitudes de todos los estudiantes de la carrera
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     solEstudiante = []
     for s in solicitudes:
         for e in arrayEstudiantesCarrera:
@@ -851,7 +873,8 @@ def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuari
     # Funcionando.
     if request.method == 'GET':
         ## Lista con los cursos asociados a ese horario y al id del docente
-        infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+        #infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+        infoDocente = requests.get("http://docente:8001/docente/%s" % idUsuario).json()
         cursos = Coordinacion_Docente.objects.filter(id_docente = infoDocente["id"], id_coordinacion__bloques_horario = bloqueHorario).values_list('id_coordinacion__id', flat= True)
         ##evaluacionCoordinacion = Evaluacion.objects.filter(id_coordinacion__id = cursos).distinct('nombre').all()
         evaluaciones = []
@@ -875,7 +898,8 @@ def evaluacionesCoordinacionCursosEspejo(request, bloqueHorario = None, idUsuari
 #-- Funcionando
 @api_view(['GET']) ## Cambio a bloque horario - antes id, se agrega distinct
 def informacionCoordinacionCursoEspejo(request, idUsuario = None ,bloqueHorario = None):
-    infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    #infoDocente = requests.get("http://127.0.0.1:8001/docente/%s" % idUsuario).json()
+    infoDocente = requests.get("http://docente:8001/docente/%s" % idUsuario).json()
     coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = infoDocente["id"]).distinct('id_coordinacion__bloques_horario')
     serializerUnico = CoordinacionDocenteCursoEspejoSerializer(coordinacion, many = "true")
     coordinacion = Coordinacion_Docente.objects.filter(id_coordinacion__bloques_horario = bloqueHorario, id_docente = infoDocente["id"]).all()
@@ -968,7 +992,8 @@ def getSeccionesAsignaturaJefeCarrera(request, idAsignatura = None):
 def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):    
     
     #obtener jefe carrera a partir del id desde microservicio
-    id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()["id"]
+    #id_jefe_carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()["id"]
+    id_jefe_carrera = requests.get("http://admin:8004/jefe_carrera/%s" % idJefeCarrera).json()["id"]
     idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_carrera).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     nombreAsignaturas = []
     dataRechazados = []
@@ -976,7 +1001,8 @@ def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):
     dataAceptados = []
     dataRevision = []
     #SolicitudSerializer
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     coordinaciones = Coordinacion_Seccion.objects.filter()
     for id in idsAsignatura:
         nombre = Asignatura.objects.filter(id = id).values_list('nombre',flat= True)
@@ -1035,7 +1061,8 @@ def getSolicitudesDashboardJefeCarrera(request, idJefeCarrera = None):
 ## Solicitudes para el jefe de carrera dash
 @api_view(['GET'])
 def getCambioNotasDashboardJefeCarrera(request, idJefeCarrera = None):    
-    id_jefeCarrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    #id_jefeCarrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    id_jefeCarrera = requests.get("http://admin:8004/jefe_carrera/%s" % idJefeCarrera).json()
     idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefeCarrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     cambios = []
     asignaturas = []
@@ -1064,8 +1091,10 @@ def getInfoDashboardAutoridadSub(request, idAutoridad = None):
     info = []
     ## n cambios notas en semestre
     #cambionota.idcalificacion = idcalificacion, calificacion.idestudiante = id_estudiante, id_planestudio
-    infoEstudiantes = requests.get("http://127.0.0.1:8000/estudiante/all").json() 
-    id_Subdirector_info = requests.get("http://127.0.0.1:8004/subdirector_docente/%s" % idAutoridad).json()
+    #infoEstudiantes = requests.get("http://127.0.0.1:8000/estudiante/all").json()
+    infoEstudiantes = requests.get("http://student:8000/estudiante/all").json() 
+    #id_Subdirector_info = requests.get("http://127.0.0.1:8004/subdirector_docente/%s" % idAutoridad).json()
+    id_Subdirector_info = requests.get("http://admin:8004/subdirector_docente/%s" % idAutoridad).json()
     planesEstudio = Plan_Estudio.objects.filter(id_carrera__id_departamento__id_subdirector = id_Subdirector_info["id"])
     
     estudiantesPlanEstudio = []
@@ -1156,7 +1185,8 @@ def getInfoDashboardAutoridadSub(request, idAutoridad = None):
             if c.id == e.id_coordinacion_id and c.isActive == True:
                 evaluacionesAutoridad.append(e)
 
-    solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    #solicitudes = requests.get("http://127.0.0.1:8003/solicitudes").json()
+    solicitudes = requests.get("http://solicitud:8003/solicitudes").json()
     sol = []
     for e in evaluacionesAutoridad:
         for s in solicitudes:
@@ -1211,7 +1241,8 @@ def getInfoDashboardAutoridadSub(request, idAutoridad = None):
 ## Cambio fecha para el jefe de carrera dash
 @api_view(['GET'])
 def getCambioFechaDashboardJefeCarrera(request, idJefeCarrera = None):    
-    id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    #id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    id_jefe_Carrera = requests.get("http://admin:8004/jefe_carrera/%s" % idJefeCarrera).json()
     idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_Carrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     cambios = []
     asignaturas = []
@@ -1228,7 +1259,8 @@ def getCambioFechaDashboardJefeCarrera(request, idJefeCarrera = None):
 ## Atrasos segun asignatura para el jefe de carrera dash
 @api_view(['GET'])
 def getAtrasosDashboardJefeCarrera(request, idJefeCarrera = None):    
-    id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    #id_jefe_Carrera = requests.get("http://127.0.0.1:8004/jefe_carrera/%s" % idJefeCarrera).json()
+    id_jefe_Carrera = requests.get("http://admin:8004/jefe_carrera/%s" % idJefeCarrera).json()
     idsAsignatura = Asignaturas_PlanEstudio.objects.filter(id_planEstudio__id_carrera__id_jefeCarrera = id_jefe_Carrera["id"]).distinct('id_asignatura').values_list('id_asignatura', flat= True)
     atrasos = []
     asignaturas = []

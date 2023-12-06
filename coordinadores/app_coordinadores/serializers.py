@@ -103,7 +103,8 @@ class EvaluacionSerializer(serializers.ModelSerializer):
         fields = ('id', 'nombre', 'fechaEvActual', 'fechaEntrega', 'ponderacion', 'estado', 'obs_general', 'adjunto', 'id_tipoEvaluacion', 'id_docente', 'id_coordinacion')
 
     def get_id_docente(self, object):
-        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        #docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        docente = requests.get("http://docente:8001/docente_id/%s" % object.id_docente).json()
         return DocenteSerializer(docente).data
 
     #def get_id_docente(self, object):
@@ -137,7 +138,8 @@ class CalificacionSerializer(serializers.ModelSerializer):
         fields = ('id', 'nota', 'fecha_entrega', 'obs_privada', 'adjunto' ,'id_evaluacion', 'id_estudiante')  
     
     def get_id_estudiante(self, object):
-        estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        #estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        estudiante = requests.get("http://student:8000/estudiante_id/%s" % object.id_estudiante).json()
         return EstudianteSerializer(estudiante).data
     
 
@@ -172,11 +174,13 @@ class SolicitudSerializer(serializers.Serializer):
         fields = '__all__'
     
     def get_id_estudiante(self, object):
-        estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        #estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        estudiante = requests.get("http://student:8000/estudiante_id/%s" % object.id_estudiante).json()
         return EstudianteSerializer(estudiante).data
     
     def get_id_docente(self, object):
-        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        #docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        docente = requests.get("http://docente:8001/docente_id/%s" % object.id_docente).json()
         return DocenteSerializer(docente).data
 
 # Modificado: Se quito el comentario de id_estudiante.
@@ -189,7 +193,8 @@ class CoordinacionEstudianteSerializer(serializers.ModelSerializer):
         fields = ('promedioEstudiante', 'id_estudiante', 'id_coordinacion')
     
     def get_id_estudiante(self, object):
-        estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        #estudiante = requests.get("http://127.0.0.1:8000/estudiante_id/%s" % object.id_estudiante).json()
+        estudiante = requests.get("http://student:8000/estudiante_id/%s" % object.id_estudiante).json()
         return EstudianteSerializer(estudiante).data
 
 #Serializer para mostrar datos en respuesta de solicitud
@@ -229,7 +234,8 @@ class DocenteCursoSerializer(serializers.ModelSerializer):
         fields = '__all__'  
     
     def get_id_docente(self, object):
-        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        #docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        docente = requests.get("http://docente:8001/docente_id/%s" % object.id_docente).json()
         return DocenteSerializer(docente).data
 
 
@@ -360,7 +366,8 @@ class EvaluacionDocenteSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def get_id_docente(self, object):
-        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        #docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        docente = requests.get("http://docente:8001/docente_id/%s" % object.id_docente).json()
         return DocenteSerializer(docente).data
 
 class CoordinacionDocenteCursoEspejoSerializer(serializers.ModelSerializer):
@@ -372,5 +379,6 @@ class CoordinacionDocenteCursoEspejoSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def get_id_docente(self, object):
-        docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        #docente = requests.get("http://127.0.0.1:8001/docente_id/%s" % object.id_docente).json()
+        docente = requests.get("http://docente:8001/docente_id/%s" % object.id_docente).json()
         return DocenteSerializer(docente).data
