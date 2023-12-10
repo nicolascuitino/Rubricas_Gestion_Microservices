@@ -354,9 +354,9 @@ ALTER TABLE public.django_session OWNER TO postgres;
 -- Data for Name: app_students_estudiante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_students_estudiante VALUES (1, 20400400, 'K', 1, 2, 3);
-INSERT INTO public.app_students_estudiante VALUES (2, 20200900, '1', 2, 1, 3);
-INSERT INTO public.app_students_estudiante VALUES (3, 40500600, 'K', 5, 2, 3);
+INSERT INTO public.app_students_estudiante VALUES (1, 20200900, '1', 1, 1, 3);
+INSERT INTO public.app_students_estudiante VALUES (2, 20400400, 'K', 20, 2, 3);
+INSERT INTO public.app_students_estudiante VALUES (3, 40500600, 'K', 50, 2, 3);
 
 
 --

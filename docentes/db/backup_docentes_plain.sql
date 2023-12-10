@@ -350,10 +350,10 @@ ALTER TABLE public.django_session OWNER TO postgres;
 -- Data for Name: app_docentes_docente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_docentes_docente VALUES (1, 20900900, '1', 9);
+INSERT INTO public.app_docentes_docente VALUES (1, 20900900, '1', 4);
 INSERT INTO public.app_docentes_docente VALUES (2, 20873546, '2', 10);
-INSERT INTO public.app_docentes_docente VALUES (3, 18506748, '2', 11);
-INSERT INTO public.app_docentes_docente VALUES (4, 10540560, '7', 8);
+INSERT INTO public.app_docentes_docente VALUES (3, 18506748, '2', 2);
+INSERT INTO public.app_docentes_docente VALUES (4, 10540560, '7', 3);
 
 
 --

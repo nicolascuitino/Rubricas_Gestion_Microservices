@@ -5,7 +5,7 @@
 -- Dumped from database version 15.1
 -- Dumped by pg_dump version 16.0
 
--- Started on 2023-11-30 11:53:18
+-- Started on 2023-12-10 11:47:04
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -956,9 +956,9 @@ INSERT INTO public.app_coordinadores_asignaturas_planestudio VALUES (7, 10, 2);
 -- Data for Name: app_coordinadores_calificacion; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_coordinadores_calificacion VALUES (77, 4.2, '2022-07-04', ' ', NULL, 2, 93);
 INSERT INTO public.app_coordinadores_calificacion VALUES (78, 6.1, '2022-07-04', ' ', NULL, 3, 93);
-INSERT INTO public.app_coordinadores_calificacion VALUES (76, 6.5, '2022-07-04', ' ', '', 1, 93);
+INSERT INTO public.app_coordinadores_calificacion VALUES (76, 6.5, '2022-07-04', ' ', '', 2, 93);
+INSERT INTO public.app_coordinadores_calificacion VALUES (77, 4.2, '2022-07-04', ' ', NULL, 1, 93);
 
 
 --
@@ -976,7 +976,7 @@ INSERT INTO public.app_coordinadores_cambio_fecha VALUES (20, '2022-08-06', '202
 -- Data for Name: app_coordinadores_cambio_nota; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_coordinadores_cambio_nota VALUES (1, 5.5, 6.5, '2023-11-14', 'Re-correccion realizada', 76);
+INSERT INTO public.app_coordinadores_cambio_nota VALUES (1, 5.5, 6.5, '2023-11-14', 'Re-correccion realizada', 77);
 
 
 --
@@ -1028,17 +1028,17 @@ INSERT INTO public.app_coordinadores_coordinacion_docente VALUES (1, 1, 2);
 -- Data for Name: app_coordinadores_coordinacion_estudiante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (1, NULL, 2, 2);
-INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (2, NULL, 1, 2);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (3, NULL, 3, 2);
-INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (4, NULL, 2, 3);
-INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (5, NULL, 1, 3);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (6, NULL, 3, 3);
-INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (9, NULL, 2, 5);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (10, NULL, 3, 1);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (11, NULL, 2, 4);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (12, NULL, 7, 1);
 INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (14, NULL, 3, 6);
+INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (1, NULL, 1, 2);
+INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (2, NULL, 2, 2);
+INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (4, NULL, 1, 3);
+INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (5, NULL, 2, 3);
+INSERT INTO public.app_coordinadores_coordinacion_estudiante VALUES (9, NULL, 1, 5);
 
 
 --
@@ -1066,7 +1066,7 @@ INSERT INTO public.app_coordinadores_coordinador VALUES (1, 15675097, '2', 12);
 INSERT INTO public.app_coordinadores_coordinador VALUES (2, 312313123, '3', 13);
 INSERT INTO public.app_coordinadores_coordinador VALUES (3, 204500000, '4', 14);
 INSERT INTO public.app_coordinadores_coordinador VALUES (4, 54424342, '6', 15);
-INSERT INTO public.app_coordinadores_coordinador VALUES (5, 205647890, '9', 8);
+INSERT INTO public.app_coordinadores_coordinador VALUES (5, 205647890, '9', 3);
 
 
 --
@@ -2449,7 +2449,7 @@ ALTER TABLE ONLY public.django_admin_log
     ADD CONSTRAINT django_admin_log_user_id_c564eba6_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED;
 
 
--- Completed on 2023-11-30 11:53:18
+-- Completed on 2023-12-10 11:47:04
 
 --
 -- PostgreSQL database dump complete

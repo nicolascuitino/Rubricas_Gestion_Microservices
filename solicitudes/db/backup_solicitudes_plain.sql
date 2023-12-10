@@ -361,7 +361,7 @@ ALTER TABLE public.django_session OWNER TO postgres;
 -- Data for Name: app_solicitudes_solicitud_revision; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_solicitudes_solicitud_revision VALUES (1, 'Creó que me merezco un 5 profesor.', NULL, 4.2, '2022-07-04', '', 'No es cierto, su calificación es la correcta. Más estudio para la próxima.', '2022-07-04', 'R', 2, 3, 93, 77);
+INSERT INTO public.app_solicitudes_solicitud_revision VALUES (1, 'Creó que me merezco un 5 profesor.', NULL, 4.2, '2022-07-04', '', 'No es cierto, su calificación es la correcta. Más estudio para la próxima.', '2022-07-04', 'R', 1, 3, 93, 77);
 
 
 --

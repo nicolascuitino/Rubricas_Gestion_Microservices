@@ -414,7 +414,7 @@ ALTER TABLE public.django_session OWNER TO postgres;
 -- Data for Name: app_admin_jefe_carrera; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_admin_jefe_carrera VALUES (1, 12345678, '3', 9);
+INSERT INTO public.app_admin_jefe_carrera VALUES (1, 12345678, '3', 4);
 INSERT INTO public.app_admin_jefe_carrera VALUES (2, 12345678, '4', 100);
 
 
@@ -424,7 +424,7 @@ INSERT INTO public.app_admin_jefe_carrera VALUES (2, 12345678, '4', 100);
 -- Data for Name: app_admin_subdirector_docente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.app_admin_subdirector_docente VALUES (1, 12345678, '2', 7);
+INSERT INTO public.app_admin_subdirector_docente VALUES (1, 12345678, '2', 5);
 
 
 --
